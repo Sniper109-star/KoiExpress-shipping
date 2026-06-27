@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply antialiased bg-background text-foreground;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  input, select, textarea, button {
+    font-size: 16px;
+  }
+}
