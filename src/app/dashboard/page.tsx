@@ -1,7 +1,10 @@
 import { Navbar } from "@/components/navbar";
 import { Package, TrendingUp, Clock, MapPin } from "lucide-react";
+import { MapboxMap } from "@/components/map";
 
 export default function CustomerDashboard() {
+  const driverLocation: [number, number] = [-73.9857, 40.7484];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -60,6 +63,11 @@ export default function CustomerDashboard() {
               </div>
             </div>
           </div>
+
+          <MapboxMap
+            driverLocation={driverLocation}
+            className="h-[300px] md:h-[400px] w-full"
+          />
         </div>
       </main>
     </div>

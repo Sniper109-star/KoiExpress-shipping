@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
+import { MapboxMap } from "@/components/map";
 
 export default function TrackPage() {
+  const origin: [number, number] = [-74.006, 40.7128];
+  const destination: [number, number] = [-73.9352, 40.7306];
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b">
@@ -14,11 +18,11 @@ export default function TrackPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6 md:py-12">
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold">Track Package</h1>
             <p className="text-muted-foreground">
-              Enter tracking number to see shipment status.
+              Enter tracking number to see shipment status and live location.
             </p>
           </div>
 
@@ -35,6 +39,12 @@ export default function TrackPage() {
               </button>
             </div>
           </div>
+
+          <MapboxMap
+            origin={origin}
+            destination={destination}
+            className="h-[300px] md:h-[400px] w-full"
+          />
         </div>
       </main>
     </div>
