@@ -10,12 +10,12 @@ interface DashboardHeaderProps {
 
 function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 h-16 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-30 h-16 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuToggle}
-            className="md:hidden rounded-md p-2 text-dark hover:bg-accent"
+            className="md:hidden rounded-md p-2 text-dark hover:bg-primary/5"
             aria-label="Toggle menu"
           >
             <Menu className="h-5 w-5" />
@@ -31,7 +31,7 @@ function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="relative rounded-md p-2 text-dark hover:bg-accent transition-colors">
+          <button className="relative rounded-md p-2 text-dark hover:bg-primary/5 transition-colors">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
           </button>

@@ -6,10 +6,10 @@ const Card = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "primary" | "secondary" | "accent" }
 >(({ className, variant = "default", ...props }, ref) => {
   const variantClasses: Record<string, string> = {
-    default: "rounded-xl border bg-card text-card-foreground shadow-sm",
+    default: "rounded-xl border border-red-100 bg-white text-dark shadow-sm",
     primary: "rounded-xl border border-primary bg-primary text-white shadow-md",
-    secondary: "rounded-xl border border-secondary bg-secondary text-white shadow-md",
-    accent: "rounded-xl border bg-accent text-dark shadow-sm",
+    secondary: "rounded-xl border border-red-200 bg-white text-primary shadow-sm",
+    accent: "rounded-xl border border-red-100 bg-red-50 text-dark shadow-sm",
   };
 
   return (

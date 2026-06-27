@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 
 export default function Login() {
   return (
-    <div className="min-h-screen flex flex-col bg-accent">
-      <header className="border-b bg-white">
+    <div className="min-h-screen flex flex-col bg-white">
+      <header className="border-b border-border bg-white">
         <div className="container mx-auto px-4 h-16 flex items-center">
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold">
+          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
             <span>KoiExpress</span>
           </Link>
@@ -23,7 +23,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="rounded-xl border bg-card p-6 md:p-8 space-y-4 shadow-sm">
+          <div className="rounded-xl border border-red-100 bg-white p-6 md:p-8 space-y-4 shadow-sm">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-dark">
                 Email
@@ -46,7 +46,7 @@ export default function Login() {
                 className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               />
             </div>
-            <Button className="w-full h-12 rounded-md font-medium text-base">
+            <Button className="w-full h-12 rounded-md bg-primary text-white font-medium text-base hover:bg-primary/90">
               Sign In
             </Button>
           </div>

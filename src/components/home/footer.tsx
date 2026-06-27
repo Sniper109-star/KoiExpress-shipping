@@ -44,7 +44,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -56,7 +56,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -68,7 +68,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -80,7 +80,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -92,7 +92,7 @@ export function Footer() {
           <p className="text-sm text-white/60">
             &copy; {new Date().getFullYear()} KoiExpress. All rights reserved.
           </p>
-          <Button variant="secondary" size="sm">
+          <Button size="sm" className="bg-primary text-white hover:bg-primary/90 border-primary">
             Get Started
           </Button>
         </div>

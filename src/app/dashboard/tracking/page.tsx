@@ -37,7 +37,7 @@ export default function TrackingPage() {
               onChange={(e) => setTrackingId(e.target.value)}
               className="flex-1"
             />
-            <Button className="gap-2">
+            <Button className="gap-2 bg-primary text-white hover:bg-primary/90">
               <Search className="h-4 w-4" />
               Track
             </Button>
@@ -47,7 +47,7 @@ export default function TrackingPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card variant="default" className="p-0 overflow-hidden">
-              <div className="h-[300px] md:h-[400px] bg-gradient-to-br from-primary/5 via-accent to-secondary/5 flex items-center justify-center">
+              <div className="h-[300px] md:h-[400px] bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center">
                 <div className="text-center space-y-4">
                   <MapPin className="h-16 w-16 text-primary mx-auto" />
                   <p className="text-lg font-semibold text-dark">Live Map View</p>
@@ -84,7 +84,7 @@ export default function TrackingPage() {
               </div>
             </Card>
 
-            <Card variant="accent" className="p-4 md:p-6">
+            <Card variant="default" className="p-4 md:p-6">
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Shipment ID</p>
                 <p className="font-mono font-bold text-primary">{shipment.id}</p>

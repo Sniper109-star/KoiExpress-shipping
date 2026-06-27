@@ -3,21 +3,40 @@
 
 @theme {
   --color-primary: #E63946;
-  --color-primary-foreground: #ffffff;
-  --color-primary-hover: #C62B38;
+  --color-primary-foreground: #FFFFFF;
   --color-secondary: #1D3557;
-  --color-secondary-foreground: #ffffff;
-  --color-secondary-hover: #152743;
+  --color-secondary-foreground: #FFFFFF;
   --color-accent: #F1FAEE;
   --color-accent-foreground: #0B132B;
   --color-dark: #0B132B;
-  --color-dark-foreground: #ffffff;
+  --color-dark-foreground: #FFFFFF;
   --color-success: #06D6A0;
-  --color-success-foreground: #0B132B;
-  --color-card: #ffffff;
+  --color-success-foreground: #FFFFFF;
+  --color-background: #FFFFFF;
+  --color-foreground: #0B132B;
+  --color-card: #FFFFFF;
   --color-card-foreground: #0B132B;
   --color-muted: #F1FAEE;
-  --color-muted-foreground: #6B7280;
+  --color-muted-foreground: #64748B;
+  --color-border: #E2E8F0;
+  --color-input: #E2E8F0;
+  --color-ring: #E63946;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply antialiased bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  input, select, textarea, button {
+    font-size: 16px;
+  }
 }
 
 @layer base {

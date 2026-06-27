@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 
 const inter = Inter({
   subsets: ["latin"],
-  display: "swap",
+  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -14,7 +15,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "KoiExpress - Logistics & Delivery Platform",
-  description: "End-to-end delivery management with real-time tracking",
+  description: "Enterprise logistics and delivery management system",
 };
 
 export default function RootLayout({
