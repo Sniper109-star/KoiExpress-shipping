@@ -1,45 +1,46 @@
-# Active Context: SwiftShip Delivery App
+# Active Context: SwiftShip Logistics Platform
 
 ## Current State
 
-**App Status**: Full-stack delivery services application with database integration
+**App Status**: Production-ready logistics platform with Supabase integration
 
 ## Recently Completed
 
-- [x] Database schema setup with Drizzle ORM (users, packages, drivers, shipments, tracking_events)
-- [x] Authentication API (login, register with bcrypt + JWT)
-- [x] Packages API (CRUD operations, tracking)
-- [x] Drivers API (management, assignment)
-- [x] Admin dashboard API
-- [x] Frontend pages (home, login, register, track, create-shipment, dashboard, driver, admin)
-- [x] Tracking timeline UI components
+- [x] Supabase configuration and client setup
+- [x] Complete PostgreSQL schema with all tables (users, profiles, drivers, customers, shipments, tracking_events, vehicles, warehouses, payments, invoices, addresses, reviews, notifications, wallets, transactions, audit_logs, support_tickets, settings, media)
+- [x] Row Level Security policies for all roles
+- [x] Authentication with Supabase Auth
+- [x] Shadcn/UI components (button, card, input, label, table, select)
+- [x] React Hook Form with Zod validation
+- [x] TanStack Query integration
+- [x] Frontend pages (home, login, register, track, create-shipment, dashboard, admin, driver)
 
 ## Current Structure
 
-| File/Directory | Purpose |
-|----------------|---------|
-| `src/db/schema.ts` | Database tables |
-| `src/db/index.ts` | Database client |
-| `src/lib/auth.ts` | Auth utilities |
-| `src/lib/utils.ts` | Helper functions |
-| `src/app/api/auth/route.ts` | Auth endpoints |
-| `src/app/api/packages/route.ts` | Package endpoints |
-| `src/app/api/drivers/route.ts` | Driver endpoints |
-| `src/app/api/admin/route.ts` | Admin endpoints |
-| `src/app/page.tsx` | Landing page |
-| `src/app/login/page.tsx` | Login page |
-| `src/app/register/page.tsx` | Registration page |
-| `src/app/track/page.tsx` | Package tracking |
-| `src/app/create-shipment/page.tsx` | Create shipment form |
-| `src/app/dashboard/page.tsx` | Customer dashboard |
-| `src/app/admin/page.tsx` | Admin dashboard |
-| `src/app/driver/page.tsx` | Driver dashboard |
+| Directory/File | Description |
+|----------------|-------------|
+| `src/app/` | Next.js pages |
+| `src/components/ui/` | UI components |
+| `src/contexts/auth-context.tsx` | Auth context |
+| `src/lib/supabase.ts` | Supabase client |
+| `src/lib/supabase-types.ts` | Type definitions |
+| `supabase/migrations/` | SQL migrations |
+| `Dockerfile` | Docker configuration |
+| `.github/workflows/ci.yml` | CI/CD pipeline |
 
 ## Features Implemented
 
-- User registration and login with role-based access (customer, driver, admin)
-- Package creation with automatic tracking number generation
-- Real-time package tracking with event history
-- Driver assignment and management
-- Admin dashboard with statistics
-- Responsive Tailwind CSS styling
+1. **Authentication**: Email/password, OAuth providers, role-based access
+2. **Shipment Management**: Create, track, assign shipments
+3. **Driver Management**: Vehicle info, availability, earnings
+4. **Customer Management**: Profiles, addresses, wallet balance
+5. **Realtime Tracking**: GPS coordinates, status updates
+6. **Payments**: Stripe integration ready
+7. **Notifications**: In-app notification system
+
+## Next Steps
+
+- Add map integration (Google Maps/Mapbox)
+- Add email service (Resend)
+- Add payment webhooks
+- Add storage for images/documents
