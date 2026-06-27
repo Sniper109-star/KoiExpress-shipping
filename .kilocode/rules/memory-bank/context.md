@@ -1,50 +1,40 @@
-# Active Context: SwiftShip Logistics Platform
+# Active Context: KoiExpress Logistics Platform
 
 ## Current State
 
-**App Status**: Production-ready logistics platform with Supabase integration and Mapbox GL JS maps
+**App Status**: Rebranded logistics platform with KoiExpress theme (Next.js 16 + Tailwind v4)
 
 ## Recently Completed
 
-- [x] Supabase configuration and client setup
-- [x] Complete PostgreSQL schema with all tables (users, profiles, drivers, customers, shipments, tracking_events, vehicles, warehouses, payments, invoices, addresses, reviews, notifications, wallets, transactions, audit_logs, support_tickets, settings, media)
-- [x] Row Level Security policies for all roles
-- [x] Authentication with Supabase Auth
-- [x] Shadcn/UI components (button, card, input, label, table, select)
-- [x] React Hook Form with Zod validation
-- [x] TanStack Query integration
-- [x] Frontend pages (home, login, register, track, create-shipment, dashboard, admin, driver)
-- [x] Mobile-first responsive UI/UX upgrade (hamburger nav, touch-friendly forms, responsive grids)
-- [x] Mapbox GL JS integration for real-time tracking and route visualization
+- [x] KoiExpress rebranding (brand colors, fonts, logos across all pages)
+- [x] Tailwind v4 @theme configuration with KoiExpress brand colors (primary/secondary/success/dark/accent)
+- [x] Enhanced UI components: Button (primary/secondary/success variants), Card (variants), Table (themed)
+- [x] New Modal component (portal-based with backdrop-blur overlay)
+- [x] Dashboard layout system (Sidebar + Header + DashboardLayout)
+- [x] Homepage components: HeroSection, FeaturesSection, MapPreviewSection, TestimonialsSection, Footer, LandingPage
+- [x] Dashboard pages: Overview, Shipments (filters + table), Create Shipment (form + map), Drivers (table + ratings), Settings (profile/notifications/theme), Tracking (map + driver card)
+- [x] Updated existing pages (login, register, track, create-shipment) to KoiExpress branding
+- [x] Inter font import via Google Fonts in layout.tsx
+- [x] Full Next.js build verified (16 routes compiled successfully)
 
 ## Current Structure
 
 | Directory/File | Description |
 |----------------|-------------|
-| `src/app/` | Next.js pages |
-| `src/components/ui/` | UI components |
-| `src/components/navbar.tsx` | Mobile-responsive navigation |
-| `src/components/map.tsx` | Mapbox GL JS map component |
-| `src/contexts/auth-context.tsx` | Auth context |
-| `src/lib/supabase.ts` | Supabase client |
-| `src/lib/supabase-types.ts` | Type definitions |
-| `supabase/migrations/` | SQL migrations |
-| `Dockerfile` | Docker configuration |
-| `.github/workflows/ci.yml` | CI/CD pipeline |
+| `src/app/globals.css` | Tailwind v4 KoiExpress theme |
+| `src/app/layout.tsx` | Root layout with Inter font |
+| `src/components/ui/` | Enhanced UI components (card, button, table, modal, input, label, select) |
+| `src/components/layouts/` | Sidebar, DashboardHeader, DashboardLayout |
+| `src/components/home/` | HeroSection, FeaturesSection, MapPreviewSection, TestimonialsSection, Footer, LandingPage |
+| `src/app/dashboard/` | Dashboard pages with layout wrapper |
+| `src/components/navbar.tsx` | KoiExpress public navigation |
 
 ## Features Implemented
 
-1. **Authentication**: Email/password, OAuth providers, role-based access
-2. **Shipment Management**: Create, track, assign shipments
-3. **Driver Management**: Vehicle info, availability, earnings
-4. **Customer Management**: Profiles, addresses, wallet balance
-5. **Realtime Tracking**: GPS coordinates, status updates
-6. **Payments**: Stripe integration ready
-7. **Notifications**: In-app notification system
-8. **Maps**: Mapbox GL JS for delivery tracking, driver routes, and location markers
-
-## Next Steps
-
-- Add email service (Resend)
-- Add payment webhooks
-- Add storage for images/documents
+1. **Public Homepage**: Hero CTAs, feature cards, map preview, testimonials, footer
+2. **Dashboard**: Stats cards, recent shipments table, sidebar navigation
+3. **Shipments**: Filterable table with status badges
+4. **Create Shipment**: Form with service type + map preview
+5. **Drivers**: Table with ratings, vehicle info, availability badges
+6. **Settings**: Profile form, notification toggles, theme toggle
+7. **Tracking**: Map placeholder, driver info card, status display

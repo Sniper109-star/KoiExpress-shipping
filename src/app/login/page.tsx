@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Fish } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
+    <div className="min-h-screen flex flex-col bg-accent">
+      <header className="border-b bg-white">
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold">
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back</span>
+            <Fish className="h-5 w-5 text-primary" />
+            <span>KoiExpress</span>
           </Link>
         </div>
       </header>
@@ -16,15 +17,15 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">Sign in</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-dark">Welcome back</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Authentication is handled by Supabase Auth.
+              Sign in to your KoiExpress account to manage shipments.
             </p>
           </div>
 
-          <div className="rounded-xl border bg-card p-6 md:p-8 space-y-4">
+          <div className="rounded-xl border bg-card p-6 md:p-8 space-y-4 shadow-sm">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
+              <label htmlFor="email" className="text-sm font-medium text-dark">
                 Email
               </label>
               <input
@@ -35,7 +36,7 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
+              <label htmlFor="password" className="text-sm font-medium text-dark">
                 Password
               </label>
               <input
@@ -45,14 +46,14 @@ export default function Login() {
                 className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
               />
             </div>
-            <button className="w-full h-12 rounded-md bg-primary text-primary-foreground font-medium text-base">
+            <Button className="w-full h-12 rounded-md font-medium text-base">
               Sign In
-            </button>
+            </Button>
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium underline">
+            <Link href="/register" className="font-medium text-primary underline">
               Create account
             </Link>
           </p>

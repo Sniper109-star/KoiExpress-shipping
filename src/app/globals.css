@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
+@theme {
+  --color-primary: #E63946;
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #C62B38;
+  --color-secondary: #1D3557;
+  --color-secondary-foreground: #ffffff;
+  --color-secondary-hover: #152743;
+  --color-accent: #F1FAEE;
+  --color-accent-foreground: #0B132B;
+  --color-dark: #0B132B;
+  --color-dark-foreground: #ffffff;
+  --color-success: #06D6A0;
+  --color-success-foreground: #0B132B;
+  --color-card: #ffffff;
+  --color-card-foreground: #0B132B;
+  --color-muted: #F1FAEE;
+  --color-muted-foreground: #6B7280;
+}
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -10,6 +29,26 @@
     font-size: 16px;
     line-height: 1.5;
     overflow-x: hidden;
+    --background: #F1FAEE;
+    --foreground: #0B132B;
+    --card: #ffffff;
+    --card-foreground: #0B132B;
+    --popover: #ffffff;
+    --popover-foreground: #0B132B;
+    --primary: #E63946;
+    --primary-foreground: #ffffff;
+    --secondary: #1D3557;
+    --secondary-foreground: #ffffff;
+    --muted: #F1FAEE;
+    --muted-foreground: #6B7280;
+    --accent: #F1FAEE;
+    --accent-foreground: #0B132B;
+    --destructive: #EF4444;
+    --destructive-foreground: #ffffff;
+    --border: #E5E7EB;
+    --input: #E5E7EB;
+    --ring: #E63946;
+    --radius: 0.5rem;
   }
   input, select, textarea, button {
     font-size: 16px;

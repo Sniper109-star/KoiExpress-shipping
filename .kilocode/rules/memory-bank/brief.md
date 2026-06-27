@@ -1,8 +1,8 @@
-# Project Brief: SwiftShip Delivery App
+# Project Brief: KoiExpress Logistics Platform
 
 ## Purpose
 
-A full-stack web application for delivery services and shipping management with real-time tracking capabilities.
+A full-stack web application for delivery services and shipping management with real-time tracking capabilities, branded as KoiExpress.
 
 ## Target Users
 
@@ -18,11 +18,21 @@ A full-stack web application for delivery services and shipping management with 
 4. **Driver Assignment**: Assign drivers to packages and update status
 5. **Admin Dashboard**: Monitor all shipments, drivers, and statistics
 
+## Brand Colors
+
+- Primary: #E63946 (Koi Red)
+- Secondary: #1D3557 (Deep Blue)
+- Accent: #F1FAEE (Soft White)
+- Dark: #0B132B (Night Navy)
+- Success: #06D6A0 (Delivery Green)
+
 ## Tech Stack
 
 - Next.js 16 with App Router
 - React 19 with Server Components
-- Tailwind CSS 4
+- Tailwind CSS 4 with @theme directive
+- Lucide React for icons
+- MapLibre GL for maps
 - Drizzle ORM with SQLite
 - JWT Authentication
 
@@ -33,3 +43,4 @@ A full-stack web application for delivery services and shipping management with 
 - Driver assignment and status updates
 - Dashboard views for different user roles
 - Mobile-responsive UI
+- KoiExpress branding across all pages
