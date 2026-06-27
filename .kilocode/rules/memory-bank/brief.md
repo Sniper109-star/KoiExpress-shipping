@@ -1,48 +1,35 @@
-# Project Brief: Next.js Starter Template
+# Project Brief: SwiftShip Delivery App
 
 ## Purpose
 
-This is a minimal Next.js starter template designed for AI-assisted development. It provides a clean foundation that can be extended to build any type of web application through interaction with an AI assistant.
+A full-stack web application for delivery services and shipping management with real-time tracking capabilities.
 
 ## Target Users
 
-- Developers wanting a clean Next.js starting point
-- Users building applications through AI-assisted coding
-- Teams needing a standardized, modern Next.js setup
+- Customers shipping packages
+- Delivery drivers managing shipments
+- Admins overseeing operations
 
-## Core Use Case
+## Core Features
 
-Users describe what they want to build to an AI assistant, which then expands this template by:
+1. **User Management**: Registration/login with role-based access (customer, driver, admin)
+2. **Package Creation**: Create shipments with sender/recipient details and weight
+3. **Real-time Tracking**: Track packages with automatic timeline updates
+4. **Driver Assignment**: Assign drivers to packages and update status
+5. **Admin Dashboard**: Monitor all shipments, drivers, and statistics
 
-1. Adding components and pages as needed
-2. Installing additional dependencies
-3. Setting up databases, authentication, etc. using recipes
-4. Customizing styling and branding
+## Tech Stack
+
+- Next.js 16 with App Router
+- React 19 with Server Components
+- Tailwind CSS 4
+- Drizzle ORM with SQLite
+- JWT Authentication
 
 ## Key Requirements
 
-### Must Have
-
-- Modern Next.js 16 setup with App Router
-- TypeScript for type safety
-- Tailwind CSS 4 for styling
-- ESLint for code quality
-- Clean, minimal starting structure
-- Bun as package manager
-
-### Nice to Have
-
-- Recipe system for common additions (database, auth)
-- Memory bank for AI context persistence
-- Clear development guidelines
-
-## Success Metrics
-
-- Clean, zero-error TypeScript setup
-- Passing lint and type checks
-
-## Constraints
-
-- Minimal dependencies by default
-- Framework: Next.js 16 + React 19 + Tailwind CSS 4
-- Package manager: Bun
+- Package creation with auto-generated tracking numbers
+- Package tracking via tracking number
+- Driver assignment and status updates
+- Dashboard views for different user roles
+- Mobile-responsive UI
