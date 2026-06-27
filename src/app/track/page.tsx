@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
-import { MapboxMap } from "@/components/map";
+import { MapLibreMap } from "@/components/map";
 
 export default function TrackPage() {
   const origin: [number, number] = [-74.006, 40.7128];
@@ -40,7 +40,7 @@ export default function TrackPage() {
             </div>
           </div>
 
-          <MapboxMap
+          <MapLibreMap
             origin={origin}
             destination={destination}
             className="h-[300px] md:h-[400px] w-full"

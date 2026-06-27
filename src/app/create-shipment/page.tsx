@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
-import { MapboxMap } from "@/components/map";
+import { MapLibreMap } from "@/components/map";
 
 export default function CreateShipmentPage() {
   const origin: [number, number] = [-74.006, 40.7128];
@@ -71,7 +71,7 @@ export default function CreateShipmentPage() {
               </div>
             </div>
 
-            <MapboxMap
+            <MapLibreMap
               origin={origin}
               destination={destination}
               className="h-[300px] md:h-[400px] w-full"
