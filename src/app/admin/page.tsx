@@ -1,67 +1,43 @@
-import { Navbar } from "@/components/navbar";
-import { Users, Truck, BarChart3, Settings } from "lucide-react";
+"use client";
 
-export default function AdminDashboard() {
+import { FormEvent, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setPending(true); setError("");
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const role = data.user?.app_metadata?.role ?? data.user?.user_metadata?.role;
+    if (signInError || !data.user || role !== "admin") {
+      await supabase.auth.signOut(); setError("Use an authorized administrator account."); setPending(false); return;
+    }
+    document.cookie = "admin_session=authenticated-admin; path=/; max-age=28800; samesite=lax";
+    router.push("/admin/dashboard"); router.refresh();
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-12">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground mt-2">
-              Admin dashboard with analytics and management features.
-            </p>
-          </div>
-
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border bg-card p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Users</p>
-                  <p className="text-xl font-bold">0</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-card p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Truck className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Shipments</p>
-                  <p className="text-xl font-bold">0</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-card p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Revenue</p>
-                  <p className="text-xl font-bold">$0</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-card p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Settings className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Settings</p>
-                  <p className="text-xl font-bold">--</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <main className="min-h-screen bg-[#67040b] px-6 py-12 text-[#fff7df]">
+      <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-md flex-col justify-center">
+        <div className="mb-8 flex items-center gap-4">
+          <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={68} height={68} className="size-16 rounded-full border-2 border-[#dcb45a] object-cover" />
+          <div><p className="font-mono text-xs uppercase tracking-[0.24em] text-[#dcb45a]">KoiExpress</p><h1 className="font-serif text-3xl font-bold">Operations portal</h1></div>
         </div>
-      </main>
-    </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-2xl border border-[#dcb45a]/30 bg-[#250e17] p-6 shadow-2xl">
+          <div><p className="font-mono text-xs uppercase tracking-[0.2em] text-[#dcb45a]">Restricted access</p><h2 className="mt-2 text-2xl font-semibold">Sign in to administer shipments</h2></div>
+          <label className="flex flex-col gap-2 text-sm font-medium">Work email<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required className="rounded-lg border border-[#dcb45a]/30 bg-[#160a10] px-3 py-3 text-[#fff7df] outline-none focus:border-[#dcb45a]" /></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">Password<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required className="rounded-lg border border-[#dcb45a]/30 bg-[#160a10] px-3 py-3 text-[#fff7df] outline-none focus:border-[#dcb45a]" /></label>
+          {error ? <p role="alert" className="text-sm text-[#ffb4a9]">{error}</p> : null}
+          <button disabled={pending} className="rounded-lg bg-[#dcb45a] px-4 py-3 font-semibold text-[#250e17] transition hover:bg-[#f0d27f] disabled:cursor-wait disabled:opacity-60">{pending ? "Checking access…" : "Enter dashboard"}</button>
+        </form>
+      </div>
+    </main>
   );
 }
