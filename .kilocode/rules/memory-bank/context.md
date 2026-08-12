@@ -16,6 +16,8 @@
 - [x] Updated existing pages (login, register, track, create-shipment) to KoiExpress branding
 - [x] Inter font import via Google Fonts in layout.tsx
 - [x] Full Next.js build verified (16 routes compiled successfully)
+- [x] Editorial red-and-milk visual system applied across shared shells, public/auth surfaces, and dashboard primitives
+- [x] Responsive homepage preview verified at 508x800 with browser screenshot
 
 ## Current Structure
 

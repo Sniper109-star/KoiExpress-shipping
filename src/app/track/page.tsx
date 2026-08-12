@@ -8,8 +8,8 @@ export default function TrackPage() {
   const destination: [number, number] = [-73.9352, 40.7306];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <header className="border-b border-border bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
@@ -31,7 +31,7 @@ export default function TrackPage() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-red-100 bg-white p-4 md:p-6 shadow-sm">
+          <div className="rounded-xl border border-red-100 bg-background p-4 md:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
