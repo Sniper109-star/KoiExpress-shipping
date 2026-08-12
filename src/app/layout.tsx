@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "./globals.css";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -14,8 +15,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "KoiExpress - Logistics & Delivery Platform",
-  description: "Enterprise logistics and delivery management system",
+  title: "Unifet — Ship Anywhere",
+  description: "Reliable shipping and logistics solutions that move what matters, everywhere.",
 };
 
 export default function RootLayout({
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} bg-background`}>
       <body className="antialiased bg-background min-h-screen font-sans">
         {children}
       </body>

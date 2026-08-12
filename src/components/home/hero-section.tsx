@@ -4,7 +4,7 @@ import { Navigation, PackageSearch } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-red-50 to-white">
+    <section className="relative overflow-hidden bg-background">
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col gap-6">

@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 
 export default function Register() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <header className="border-b border-border bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
-            <span>KoiExpress</span>
+            <span>Unifet</span>
           </Link>
         </div>
       </header>
@@ -19,11 +19,11 @@ export default function Register() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold text-dark">Create your account</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Join KoiExpress and start shipping with confidence.
+              Join Unifet and start shipping with confidence.
             </p>
           </div>
 
-          <div className="rounded-xl border border-red-100 bg-white p-6 md:p-8 space-y-4 shadow-sm">
+          <div className="rounded-xl border border-red-100 bg-background p-6 md:p-8 space-y-4 shadow-sm">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-dark">
                 Email

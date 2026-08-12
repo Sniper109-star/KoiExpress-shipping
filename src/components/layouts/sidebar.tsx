@@ -32,7 +32,7 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-full bg-dark text-white transition-all duration-300",
+        "flex flex-col h-full bg-secondary text-secondary-foreground transition-all duration-300",
         isCollapsed ? "w-16" : "w-64",
         className
       )}
@@ -40,7 +40,7 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
       <div className="flex items-center gap-3 h-16 px-4 border-b border-white/10">
         <Fish className="h-6 w-6 text-primary flex-shrink-0" />
         {!isCollapsed && (
-          <span className="text-lg font-bold tracking-tight">KoiExpress</span>
+          <span className="text-lg font-bold tracking-tight">Unifet</span>
         )}
       </div>
 

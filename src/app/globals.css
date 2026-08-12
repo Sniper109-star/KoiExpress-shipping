@@ -1,75 +1,58 @@
 @import "tailwindcss";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
-@theme {
-  --color-primary: #E63946;
-  --color-primary-foreground: #FFFFFF;
-  --color-secondary: #1D3557;
-  --color-secondary-foreground: #FFFFFF;
-  --color-accent: #F1FAEE;
-  --color-accent-foreground: #0B132B;
-  --color-dark: #0B132B;
-  --color-dark-foreground: #FFFFFF;
-  --color-success: #06D6A0;
-  --color-success-foreground: #FFFFFF;
-  --color-background: #FFFFFF;
-  --color-foreground: #0B132B;
-  --color-card: #FFFFFF;
-  --color-card-foreground: #0B132B;
-  --color-muted: #F1FAEE;
-  --color-muted-foreground: #64748B;
-  --color-border: #E2E8F0;
-  --color-input: #E2E8F0;
-  --color-ring: #E63946;
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-primary: #f97316;
+  --color-primary-foreground: #fffaf0;
+  --color-secondary: #102a43;
+  --color-secondary-foreground: #fffaf0;
+  --color-accent: #e8f0f7;
+  --color-accent-foreground: #102a43;
+  --color-dark: #102a43;
+  --color-dark-foreground: #fffaf0;
+  --color-success: #2f855a;
+  --color-success-foreground: #fffaf0;
+  --color-background: #fffaf0;
+  --color-foreground: #102a43;
+  --color-card: #ffffff;
+  --color-card-foreground: #102a43;
+  --color-muted: #e8f0f7;
+  --color-muted-foreground: #627d98;
+  --color-border: #cbd5e1;
+  --color-input: #b8c6d3;
+  --color-ring: #f97316;
 }
 
 @layer base {
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
+  * { -webkit-tap-highlight-color: transparent; }
+  html { background: #fffaf0; }
   body {
     @apply antialiased bg-background text-foreground;
     font-family: var(--font-inter), system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.5;
     overflow-x: hidden;
-  }
-  input, select, textarea, button {
-    font-size: 16px;
-  }
-}
-
-@layer base {
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
-  body {
-    @apply antialiased bg-background text-foreground;
-    font-size: 16px;
-    line-height: 1.5;
-    overflow-x: hidden;
-    --background: #F1FAEE;
-    --foreground: #0B132B;
+    --background: #fffaf0;
+    --foreground: #102a43;
     --card: #ffffff;
-    --card-foreground: #0B132B;
+    --card-foreground: #102a43;
     --popover: #ffffff;
-    --popover-foreground: #0B132B;
-    --primary: #E63946;
-    --primary-foreground: #ffffff;
-    --secondary: #1D3557;
-    --secondary-foreground: #ffffff;
-    --muted: #F1FAEE;
-    --muted-foreground: #6B7280;
-    --accent: #F1FAEE;
-    --accent-foreground: #0B132B;
-    --destructive: #EF4444;
-    --destructive-foreground: #ffffff;
-    --border: #E5E7EB;
-    --input: #E5E7EB;
-    --ring: #E63946;
-    --radius: 0.5rem;
+    --popover-foreground: #102a43;
+    --primary: #f97316;
+    --primary-foreground: #fffaf0;
+    --secondary: #102a43;
+    --secondary-foreground: #fffaf0;
+    --muted: #e8f0f7;
+    --muted-foreground: #627d98;
+    --accent: #e8f0f7;
+    --accent-foreground: #102a43;
+    --destructive: #c53030;
+    --destructive-foreground: #fffaf0;
+    --border: #cbd5e1;
+    --input: #b8c6d3;
+    --ring: #f97316;
+    --radius: 0.25rem;
   }
-  input, select, textarea, button {
-    font-size: 16px;
-  }
+  input, select, textarea, button { font-size: 16px; }
 }

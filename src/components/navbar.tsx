@@ -9,11 +9,11 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
           <Fish className="h-6 w-6 text-primary" />
-          <span>KoiExpress</span>
+          <span>Unifet</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-2">

@@ -8,12 +8,12 @@ export default function CreateShipmentPage() {
   const destination: [number, number] = [-73.9352, 40.7306];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <header className="border-b border-border bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
-            <span className="hidden sm:inline">KoiExpress</span>
+            <span className="hidden sm:inline">Unifet</span>
           </Link>
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
             <ArrowLeft className="h-4 w-4" />
@@ -32,7 +32,7 @@ export default function CreateShipmentPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-red-100 bg-white p-6 md:p-8 shadow-sm">
+            <div className="rounded-xl border border-red-100 bg-background p-6 md:p-8 shadow-sm">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="origin" className="text-sm font-medium text-dark">
