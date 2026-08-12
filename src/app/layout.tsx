@@ -15,7 +15,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Unifet — Ship Anywhere",
+  title: "Unifet — Redefining the Journey",
   description: "Reliable shipping and logistics solutions that move what matters, everywhere.",
 };
 

@@ -3,25 +3,25 @@
 
 @theme inline {
   --font-sans: 'Inter', system-ui, sans-serif;
-  --color-primary: #f97316;
+  --color-primary: #b3263e;
   --color-primary-foreground: #fffaf0;
-  --color-secondary: #102a43;
+  --color-secondary: #32151e;
   --color-secondary-foreground: #fffaf0;
-  --color-accent: #e8f0f7;
-  --color-accent-foreground: #102a43;
-  --color-dark: #102a43;
+  --color-accent: #f2ded5;
+  --color-accent-foreground: #32151e;
+  --color-dark: #32151e;
   --color-dark-foreground: #fffaf0;
-  --color-success: #2f855a;
+  --color-success: #356859;
   --color-success-foreground: #fffaf0;
   --color-background: #fffaf0;
-  --color-foreground: #102a43;
-  --color-card: #ffffff;
-  --color-card-foreground: #102a43;
-  --color-muted: #e8f0f7;
-  --color-muted-foreground: #627d98;
-  --color-border: #cbd5e1;
-  --color-input: #b8c6d3;
-  --color-ring: #f97316;
+  --color-foreground: #32151e;
+  --color-card: #fffdf8;
+  --color-card-foreground: #32151e;
+  --color-muted: #f2ded5;
+  --color-muted-foreground: #765e63;
+  --color-border: #e4c9c0;
+  --color-input: #d7b8ae;
+  --color-ring: #b3263e;
 }
 
 @layer base {
@@ -34,24 +34,24 @@
     line-height: 1.5;
     overflow-x: hidden;
     --background: #fffaf0;
-    --foreground: #102a43;
-    --card: #ffffff;
-    --card-foreground: #102a43;
-    --popover: #ffffff;
-    --popover-foreground: #102a43;
-    --primary: #f97316;
+    --foreground: #32151e;
+    --card: #fffdf8;
+    --card-foreground: #32151e;
+    --popover: #fffdf8;
+    --popover-foreground: #32151e;
+    --primary: #b3263e;
     --primary-foreground: #fffaf0;
-    --secondary: #102a43;
+    --secondary: #32151e;
     --secondary-foreground: #fffaf0;
-    --muted: #e8f0f7;
-    --muted-foreground: #627d98;
-    --accent: #e8f0f7;
-    --accent-foreground: #102a43;
-    --destructive: #c53030;
+    --muted: #f2ded5;
+    --muted-foreground: #765e63;
+    --accent: #f2ded5;
+    --accent-foreground: #32151e;
+    --destructive: #8f1930;
     --destructive-foreground: #fffaf0;
-    --border: #cbd5e1;
-    --input: #b8c6d3;
-    --ring: #f97316;
+    --border: #e4c9c0;
+    --input: #d7b8ae;
+    --ring: #b3263e;
     --radius: 0.25rem;
   }
   input, select, textarea, button { font-size: 16px; }
