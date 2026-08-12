@@ -27,13 +27,14 @@
 - [x] Generated and added premium delivery van, freight truck, and cargo aircraft imagery to the homepage fleet showcase
 - [x] Optimized fleet imagery with next/image and verified the red-and-milk homepage in the browser
 - [x] Added Resend contact/support and shipment notification API routes using `process.env.RESEND_API_KEY`
-- [x] Added Convex realtime projection schema/functions and connected the Convex client provider to `https://earnest-finch-735.convex.cloud`
+- [x] Replaced the temporary realtime layer with Supabase Realtime shipment and tracking event subscriptions
+- [x] Added OpenFreeMap Liberty MapLibre tracking maps with safe popup content and live event markers
 - [x] Reused the shared Supabase client for auth and added the email callback redirect
 - [x] Typecheck, lint, production build, and desktop browser verification passed
 
 ## Integration Notes
 
-Convex source files live in `convex/` and intentionally exclude generated bindings from the app TypeScript project. The local Convex CLI could not generate deployment bindings because its bundled binary requires glibc 2.35 while the sandbox image is older; the app still connects its client provider to the supplied deployment URL, and the Convex backend files are ready for deployment from a compatible environment.
+Supabase is the only backend for shipment data and realtime updates. Public tracking reads shipment and tracking event rows, while authenticated write policies scope changes to the owning user.
 
 ## Current Structure
 
