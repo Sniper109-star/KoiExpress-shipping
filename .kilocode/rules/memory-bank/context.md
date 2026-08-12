@@ -31,6 +31,9 @@
 - [x] Added OpenFreeMap Liberty MapLibre tracking maps with safe popup content and live event markers
 - [x] Reused the shared Supabase client for auth and added the email callback redirect
 - [x] Typecheck, lint, production build, and desktop browser verification passed
+- [x] Added uploaded KoiExpress emblem as the shared public and admin brand logo
+- [x] Built Supabase-backed admin login, protected middleware, dashboard, orders, customers, and admin API routes
+- [x] Added admin signout route and verified typecheck, lint, and production build
 
 ## Integration Notes
 
