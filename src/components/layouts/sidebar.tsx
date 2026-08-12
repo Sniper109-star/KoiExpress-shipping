@@ -32,7 +32,7 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-full bg-secondary text-secondary-foreground transition-all duration-300",
+        "flex flex-col h-full bg-primary text-primary-foreground transition-all duration-300",
         isCollapsed ? "w-16" : "w-64",
         className
       )}

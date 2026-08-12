@@ -23,6 +23,9 @@
 - [x] Rebuilt homepage with Unifet hero, services, journey, tracking, benefits, quote calculator, and about sections
 - [x] Added public tracking lookup with shipment Realtime subscription and persisted quote requests
 - [x] Typecheck, lint, production build, and mobile browser verification passed
+- [x] Switched Unifet from navy/orange to an exclusive red-and-milk palette
+- [x] Generated and added premium delivery van, freight truck, and cargo aircraft imagery to the homepage fleet showcase
+- [x] Optimized fleet imagery with next/image and verified the red-and-milk homepage in the browser
 
 ## Current Structure
 

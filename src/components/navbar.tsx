@@ -40,7 +40,7 @@ export function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden border-t border-border bg-white">
+        <div className="md:hidden border-t border-border bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
             <Link href="/track" onClick={() => setIsOpen(false)}>
               <Button variant="ghost" className="w-full justify-center text-base h-12 text-foreground hover:text-primary hover:bg-primary/5">
