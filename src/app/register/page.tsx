@@ -9,7 +9,7 @@ export default function Register() {
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
-            <span>KoiExpress</span>
+            <span>Unifet</span>
           </Link>
         </div>
       </header>
@@ -19,7 +19,7 @@ export default function Register() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold text-dark">Create your account</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Join KoiExpress and start shipping with confidence.
+              Join Unifet and start shipping with confidence.
             </p>
           </div>
 

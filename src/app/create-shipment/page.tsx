@@ -13,7 +13,7 @@ export default function CreateShipmentPage() {
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
             <Fish className="h-5 w-5 text-primary" />
-            <span className="hidden sm:inline">KoiExpress</span>
+            <span className="hidden sm:inline">Unifet</span>
           </Link>
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
             <ArrowLeft className="h-4 w-4" />

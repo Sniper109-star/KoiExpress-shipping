@@ -15,8 +15,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "KoiExpress - Logistics & Delivery Platform",
-  description: "Enterprise logistics and delivery management system",
+  title: "Unifet — Ship Anywhere",
+  description: "Reliable shipping and logistics solutions that move what matters, everywhere.",
 };
 
 export default function RootLayout({

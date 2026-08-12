@@ -1,8 +1,8 @@
-# Active Context: KoiExpress Logistics Platform
+# Active Context: Unifet Logistics Platform
 
 ## Current State
 
-**App Status**: Rebranded logistics platform with KoiExpress theme (Next.js 16 + Tailwind v4)
+**App Status**: Unifet logistics platform with live Supabase shipment, event, customer, driver, and quote schema (Next.js 16 + Tailwind v4)
 
 ## Recently Completed
 
@@ -18,6 +18,11 @@
 - [x] Full Next.js build verified (16 routes compiled successfully)
 - [x] Editorial red-and-milk visual system applied across shared shells, public/auth surfaces, and dashboard primitives
 - [x] Responsive homepage preview verified at 508x800 with browser screenshot
+- [x] Rebranded product to Unifet with navy and orange semantic design tokens
+- [x] Added Supabase logistics schema with RLS policies, shipment events, quotes, customers, drivers, indexes, and Realtime publication tables
+- [x] Rebuilt homepage with Unifet hero, services, journey, tracking, benefits, quote calculator, and about sections
+- [x] Added public tracking lookup with shipment Realtime subscription and persisted quote requests
+- [x] Typecheck, lint, production build, and mobile browser verification passed
 
 ## Current Structure
 

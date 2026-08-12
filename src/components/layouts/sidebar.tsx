@@ -40,7 +40,7 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
       <div className="flex items-center gap-3 h-16 px-4 border-b border-white/10">
         <Fish className="h-6 w-6 text-primary flex-shrink-0" />
         {!isCollapsed && (
-          <span className="text-lg font-bold tracking-tight">KoiExpress</span>
+          <span className="text-lg font-bold tracking-tight">Unifet</span>
         )}
       </div>
 
