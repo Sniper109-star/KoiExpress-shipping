@@ -26,6 +26,15 @@
 - [x] Switched Unifet from navy/orange to an exclusive red-and-milk palette
 - [x] Generated and added premium delivery van, freight truck, and cargo aircraft imagery to the homepage fleet showcase
 - [x] Optimized fleet imagery with next/image and verified the red-and-milk homepage in the browser
+- [x] Added Resend contact/support and shipment notification API routes using `process.env.RESEND_API_KEY`
+- [x] Replaced the temporary realtime layer with Supabase Realtime shipment and tracking event subscriptions
+- [x] Added OpenFreeMap Liberty MapLibre tracking maps with safe popup content and live event markers
+- [x] Reused the shared Supabase client for auth and added the email callback redirect
+- [x] Typecheck, lint, production build, and desktop browser verification passed
+
+## Integration Notes
+
+Supabase is the only backend for shipment data and realtime updates. Public tracking reads shipment and tracking event rows, while authenticated write policies scope changes to the owning user.
 
 ## Current Structure
 

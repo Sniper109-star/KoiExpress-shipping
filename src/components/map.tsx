@@ -12,88 +12,46 @@ interface MapLibreMapProps {
   markers?: Array<{ coordinates: [number, number]; label?: string }>;
 }
 
-export function MapLibreMap({
-  className = "h-[400px] w-full rounded-xl border",
-  origin,
-  destination,
-  driverLocation,
-  markers = [],
-}: MapLibreMapProps) {
+function popupContent(title: string, detail?: string) {
+  const element = document.createElement("div");
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  element.appendChild(heading);
+  if (detail) {
+    const body = document.createElement("div");
+    body.textContent = detail;
+    element.appendChild(body);
+  }
+  return element;
+}
+
+export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", origin, destination, driverLocation, markers = [] }: MapLibreMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
-
+    const points = [origin, destination, driverLocation, ...markers.map((marker) => marker.coordinates)].filter(Boolean) as [number, number][];
     const bounds = new maplibregl.LngLatBounds();
-    const points: [number, number][] = [];
-
-    if (origin) {
-      points.push(origin);
-      bounds.extend(origin);
-    }
-    if (destination) {
-      points.push(destination);
-      bounds.extend(destination);
-    }
-    if (driverLocation) {
-      points.push(driverLocation);
-      bounds.extend(driverLocation);
-    }
-    markers.forEach((m) => {
-      points.push(m.coordinates);
-      bounds.extend(m.coordinates);
-    });
-
-    const mapInstance = new maplibregl.Map({
+    points.forEach((point) => bounds.extend(point));
+    const instance = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://tiles.openfreemap.org/styles/liberty",
-      center: points.length > 0 ? points[0] : [-74.5, 40],
-      zoom: points.length > 1 ? undefined : 12,
+      center: points[0] ?? [-74.006, 40.7128],
+      zoom: points.length > 1 ? undefined : 11,
       bounds: points.length > 1 ? bounds : undefined,
+      fitBoundsOptions: { padding: 56, maxZoom: 13 },
     });
-
-    map.current = mapInstance;
-
-    mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
-
-    mapInstance.on("load", () => {
-      if (origin) {
-        new maplibregl.Marker({ color: "#E63946" })
-          .setLngLat(origin)
-          .setPopup(new maplibregl.Popup().setHTML("<strong>Origin</strong>"))
-          .addTo(mapInstance);
-      }
-
-      if (destination) {
-        new maplibregl.Marker({ color: "#1D3557" })
-          .setLngLat(destination)
-          .setPopup(new maplibregl.Popup().setHTML("<strong>Destination</strong>"))
-          .addTo(mapInstance);
-      }
-
-      if (driverLocation) {
-        new maplibregl.Marker({ color: "#06D6A0", scale: 0.8 })
-          .setLngLat(driverLocation)
-          .setPopup(new maplibregl.Popup().setHTML("<strong>Driver Location</strong>"))
-          .addTo(mapInstance);
-      }
-
-      markers.forEach((marker) => {
-        new maplibregl.Marker({ color: "#E63946" })
-          .setLngLat(marker.coordinates)
-          .setPopup(
-            new maplibregl.Popup().setHTML(marker.label || "<strong>Marker</strong>")
-          )
-          .addTo(mapInstance);
-      });
+    map.current = instance;
+    instance.addControl(new maplibregl.NavigationControl(), "top-right");
+    instance.on("load", () => {
+      if (origin) new maplibregl.Marker({ color: "#D62828" }).setLngLat(origin).setPopup(new maplibregl.Popup().setDOMContent(popupContent("Pickup location"))).addTo(instance);
+      if (destination) new maplibregl.Marker({ color: "#1D3557" }).setLngLat(destination).setPopup(new maplibregl.Popup().setDOMContent(popupContent("Delivery location"))).addTo(instance);
+      if (driverLocation) new maplibregl.Marker({ color: "#2A9D8F" }).setLngLat(driverLocation).setPopup(new maplibregl.Popup().setDOMContent(popupContent("Current driver location"))).addTo(instance);
+      markers.forEach((marker) => new maplibregl.Marker({ color: "#D62828" }).setLngLat(marker.coordinates).setPopup(new maplibregl.Popup().setDOMContent(popupContent(marker.label ?? "Tracking event"))).addTo(instance));
     });
-
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
+    return () => { instance.remove(); map.current = null; };
   }, [origin, destination, driverLocation, markers]);
 
-  return <div ref={mapContainer} className={className} />;
+  return <div ref={mapContainer} className={className} aria-label="OpenFreeMap shipment tracking map" />;
 }
