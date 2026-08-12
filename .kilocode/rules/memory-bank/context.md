@@ -26,6 +26,14 @@
 - [x] Switched Unifet from navy/orange to an exclusive red-and-milk palette
 - [x] Generated and added premium delivery van, freight truck, and cargo aircraft imagery to the homepage fleet showcase
 - [x] Optimized fleet imagery with next/image and verified the red-and-milk homepage in the browser
+- [x] Added Resend contact/support and shipment notification API routes using `process.env.RESEND_API_KEY`
+- [x] Added Convex realtime projection schema/functions and connected the Convex client provider to `https://earnest-finch-735.convex.cloud`
+- [x] Reused the shared Supabase client for auth and added the email callback redirect
+- [x] Typecheck, lint, production build, and desktop browser verification passed
+
+## Integration Notes
+
+Convex source files live in `convex/` and intentionally exclude generated bindings from the app TypeScript project. The local Convex CLI could not generate deployment bindings because its bundled binary requires glibc 2.35 while the sandbox image is older; the app still connects its client provider to the supplied deployment URL, and the Convex backend files are ready for deployment from a compatible environment.
 
 ## Current Structure
 
