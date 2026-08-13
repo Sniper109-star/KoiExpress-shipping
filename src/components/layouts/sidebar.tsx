@@ -10,8 +10,8 @@ import {
   Truck,
   MapPin,
   Settings,
-  Fish,
 } from "lucide-react";
+import Image from "next/image";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -38,9 +38,9 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
       )}
     >
       <div className="flex items-center gap-3 h-16 px-4 border-b border-white/10">
-        <Fish className="h-6 w-6 text-primary flex-shrink-0" />
+        <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={34} height={34} className="size-8 rounded-full object-cover flex-shrink-0" />
         {!isCollapsed && (
-          <span className="text-lg font-bold tracking-tight">Unifet</span>
+          <span className="text-lg font-bold tracking-tight">KoiExpress</span>
         )}
       </div>
 

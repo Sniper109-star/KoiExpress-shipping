@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Fish, Search, Truck } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Search, Truck } from "lucide-react";
 import { MapLibreMap } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { findShipment, getTrackingEvents, subscribeToShipment, TrackingEvent, TrackingShipment } from "@/lib/shipment-tracking";
@@ -44,7 +45,7 @@ export default function TrackPage() {
   const destination = shipment?.delivery_longitude != null && shipment.delivery_latitude != null ? [Number(shipment.delivery_longitude), Number(shipment.delivery_latitude)] as [number, number] : undefined;
 
   return <div className="min-h-screen flex flex-col bg-background">
-    <header className="border-b border-border"><div className="container mx-auto flex h-16 items-center gap-4 px-4"><Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary"><Fish className="size-5" /><span>Unifet</span></Link><Link href="/" className="ml-auto flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4" />Back to Home</Link></div></header>
+    <header className="border-b border-border"><div className="container mx-auto flex h-16 items-center gap-4 px-4"><Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary"><Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={28} height={28} className="size-7 rounded-full object-cover" /><span>KoiExpress USA - Global</span></Link><Link href="/" className="ml-auto flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4" />Back to Home</Link></div></header>
     <main className="container mx-auto flex-1 px-4 py-8"><div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div><h1 className="text-3xl font-bold tracking-tight">Track your shipment</h1><p className="text-muted-foreground">Live updates powered by Supabase Realtime and OpenFreeMap.</p></div>
       <form onSubmit={loadShipment} className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row"><input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Enter tracking number" className="h-12 flex-1 rounded-md border bg-background px-3" aria-label="Tracking number"/><Button type="submit" disabled={loading} className="h-12 gap-2"><Search className="size-4" />{loading ? "Searching…" : "Track"}</Button></form>
