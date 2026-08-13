@@ -56,7 +56,7 @@ export function LandingPage() {
   useEffect(() => {
     if (!trackedShipment?.id) return;
     const channel = supabase.channel(`shipment-${trackedShipment.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shipments", filter: `id=eq.${trackedShipment.id}` }, (payload: { new: Record<string, unknown> }) => setTrackedShipment(payload.new))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "shipments", filter: `id=eq.${trackedShipment.id}` }, (payload) => setTrackedShipment(payload.new as { id: string; tracking_number: string; origin: string; destination: string; status: string }))
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [trackedShipment?.id]);
@@ -75,7 +75,7 @@ export function LandingPage() {
   }
 
   async function saveQuote() {
-    if (!supabase || !quote.pickup || !quote.destination || !quote.weight) return;
+    if (!quote.pickup || !quote.destination || !quote.weight) return;
     const { error } = await supabase.from("quotes").insert({ pickup_location: quote.pickup, destination: quote.destination, package_type: quote.type, weight: Number(quote.weight), dimensions: quote.dimensions || null, delivery_speed: quote.speed, estimated_cost: estimate });
     setQuoteSaved(!error);
   }

@@ -29,7 +29,6 @@ export type TrackingEvent = {
 }
 
 export async function findShipment(trackingNumber: string) {
-  if (!supabase) throw new Error('Supabase is not configured')
   const { data, error } = await supabase
     .from('shipments')
     .select('id, tracking_number, origin, destination, origin_lat, origin_lng, destination_lat, destination_lng, status, eta, driver_name, vehicle, updated_at, last_update')
@@ -40,7 +39,6 @@ export async function findShipment(trackingNumber: string) {
 }
 
 export async function getTrackingEvents(shipmentId: string) {
-  if (!supabase) throw new Error('Supabase is not configured')
   const { data, error } = await supabase.from('tracking_events').select('*').eq('shipment_id', shipmentId).order('created_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as TrackingEvent[]

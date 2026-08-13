@@ -38,6 +38,10 @@
 - [x] Removed stale Unifet, fish-icon, and Lagos/London identity references across public and authenticated surfaces
 - [x] Updated metadata, auth pages, shipment tracking, footer, sidebar, and homepage messaging for worldwide coverage
 - [x] Verified typecheck, lint, production build, and homepage browser rendering
+- [x] Audited Supabase environment usage, client/server auth wiring, shipment query types, and realtime subscriptions
+- [x] Added missing Supabase profiles and quotes tables, RLS policies, grants, and realtime publication entries
+- [x] Fixed all stale shipment field references and realtime callback typing errors
+- [x] Re-ran typecheck, lint, environment-aware production build, and browser smoke test successfully
 
 ## Integration Notes
 
