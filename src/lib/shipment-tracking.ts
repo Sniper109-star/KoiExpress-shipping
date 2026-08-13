@@ -3,16 +3,18 @@ import { supabase } from '@/lib/supabase'
 export type TrackingShipment = {
   id: string
   tracking_number: string
-  pickup_address: string
-  delivery_address: string
-  pickup_latitude: number | null
-  pickup_longitude: number | null
-  delivery_latitude: number | null
-  delivery_longitude: number | null
+  origin: string
+  destination: string
+  origin_lat: number | null
+  origin_lng: number | null
+  destination_lat: number | null
+  destination_lng: number | null
   status: string
-  estimated_delivery_at: string | null
+  eta: string | null
+  driver_name: string | null
+  vehicle: string | null
   updated_at: string | null
-  driver?: { profile?: { full_name: string | null } | null; vehicle?: { make: string; model: string } | null } | null
+  last_update: string | null
 }
 
 export type TrackingEvent = {
@@ -22,7 +24,7 @@ export type TrackingEvent = {
   location: string | null
   latitude: number | null
   longitude: number | null
-  description: string | null
+  message: string
   created_at: string
 }
 
@@ -30,7 +32,7 @@ export async function findShipment(trackingNumber: string) {
   if (!supabase) throw new Error('Supabase is not configured')
   const { data, error } = await supabase
     .from('shipments')
-    .select('id, tracking_number, pickup_address, delivery_address, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, status, estimated_delivery_at, updated_at, driver:drivers(profile:profiles(full_name), vehicle:vehicles(make, model))')
+    .select('id, tracking_number, origin, destination, origin_lat, origin_lng, destination_lat, destination_lng, status, eta, driver_name, vehicle, updated_at, last_update')
     .eq('tracking_number', trackingNumber.trim())
     .maybeSingle()
   if (error) throw error

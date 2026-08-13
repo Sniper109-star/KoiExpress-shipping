@@ -49,12 +49,12 @@ const benefits = [
 
 export function LandingPage() {
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [trackedShipment, setTrackedShipment] = useState<any>(null);
+  const [trackedShipment, setTrackedShipment] = useState<{ id: string; tracking_number: string; origin: string; destination: string; status: string } | null>(null);
   const [quote, setQuote] = useState({ pickup: "", destination: "", type: "Parcel", weight: "", dimensions: "", speed: "standard" });
   const [quoteSaved, setQuoteSaved] = useState(false);
 
   useEffect(() => {
-    if (!supabase || !trackedShipment?.id) return;
+    if (!trackedShipment?.id) return;
     const channel = supabase.channel(`shipment-${trackedShipment.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "shipments", filter: `id=eq.${trackedShipment.id}` }, (payload: { new: Record<string, unknown> }) => setTrackedShipment(payload.new))
       .subscribe();
@@ -69,8 +69,8 @@ export function LandingPage() {
   }, [quote]);
 
   async function trackShipment() {
-    if (!supabase || !trackingNumber.trim()) return;
-    const { data } = await supabase.from("shipments").select("*, shipment_events(*)").eq("tracking_number", trackingNumber.trim().toUpperCase()).maybeSingle();
+    if (!trackingNumber.trim()) return;
+    const { data } = await supabase.from("shipments").select("id, tracking_number, origin, destination, status").eq("tracking_number", trackingNumber.trim()).maybeSingle();
     setTrackedShipment(data);
   }
 
@@ -120,7 +120,7 @@ export function LandingPage() {
           </article>
         </div>
       </section>
-      <section id="tracking" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-20 md:px-8 md:py-28"><div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Shipment visibility</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Track your shipment.</h2><p className="mt-5 max-w-md leading-7 text-muted-foreground">Enter your KoiExpress tracking number for live status updates and the latest checkpoint.</p></div><div className="border border-border bg-card p-6 md:p-8"><div className="flex flex-col gap-3 sm:flex-row"><input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Enter tracking number" className="h-14 flex-1 border border-input bg-background px-4 outline-none focus:border-primary" /><Button onClick={trackShipment} className="h-14 rounded-sm px-6">Track Package <Search data-icon="inline-end" /></Button></div>{trackedShipment ? <div className="mt-8"><div className="flex items-center justify-between border-b border-border pb-4"><div><p className="font-semibold">{trackedShipment.tracking_number}</p><p className="text-sm text-muted-foreground">{trackedShipment.pickup_location} to {trackedShipment.destination}</p></div><span className="bg-accent px-3 py-1 text-sm font-semibold capitalize text-primary">{trackedShipment.status.replaceAll("_", " ")}</span></div><div className="mt-8 grid grid-cols-4 gap-2">{["picked_up", "in_transit", "at_destination", "delivered"].map((status) => <div key={status} className="flex flex-col gap-2"><div className={`h-2 ${["picked_up", "in_transit", "at_destination", "delivered"].indexOf(trackedShipment.status) >= ["picked_up", "in_transit", "at_destination", "delivered"].indexOf(status) ? "bg-primary" : "bg-muted"}`} /><span className="text-xs capitalize text-muted-foreground">{status.replaceAll("_", " ")}</span></div>)}</div></div> : <p className="mt-6 text-sm text-muted-foreground">Try the demo number: UNI-2048-ORANGE</p>}</div></div></section>
+      <section id="tracking" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-20 md:px-8 md:py-28"><div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Shipment visibility</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Track your shipment.</h2><p className="mt-5 max-w-md leading-7 text-muted-foreground">Enter your KoiExpress tracking number for live status updates and the latest checkpoint.</p></div><div className="border border-border bg-card p-6 md:p-8"><div className="flex flex-col gap-3 sm:flex-row"><input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Enter tracking number" className="h-14 flex-1 border border-input bg-background px-4 outline-none focus:border-primary" /><Button onClick={trackShipment} className="h-14 rounded-sm px-6">Track Package <Search data-icon="inline-end" /></Button></div>{trackedShipment ? <div className="mt-8"><div className="flex items-center justify-between border-b border-border pb-4"><div><p className="font-semibold">{trackedShipment.tracking_number}</p><p className="text-sm text-muted-foreground">{trackedShipment.origin} to {trackedShipment.destination}</p></div><span className="bg-accent px-3 py-1 text-sm font-semibold capitalize text-primary">{trackedShipment.status.replaceAll("_", " ")}</span></div><div className="mt-8 grid grid-cols-4 gap-2">{["picked_up", "in_transit", "at_destination", "delivered"].map((status) => <div key={status} className="flex flex-col gap-2"><div className={`h-2 ${["picked_up", "in_transit", "at_destination", "delivered"].indexOf(trackedShipment.status) >= ["picked_up", "in_transit", "at_destination", "delivered"].indexOf(status) ? "bg-primary" : "bg-muted"}`} /><span className="text-xs capitalize text-muted-foreground">{status.replaceAll("_", " ")}</span></div>)}</div></div> : <p className="mt-6 text-sm text-muted-foreground">Try the demo number: UNI-2048-ORANGE</p>}</div></div></section>
 
       <section className="bg-secondary text-secondary-foreground"><div className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28"><div className="mb-12 max-w-2xl"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Why KoiExpress</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Built for the moments that matter.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{benefits.map(([Icon, title]) => <div key={title} className="flex items-center gap-4 border border-secondary-foreground/15 p-5"><Icon className="text-primary" /><span className="font-medium">{title}</span></div>)}</div></div></section>
 
