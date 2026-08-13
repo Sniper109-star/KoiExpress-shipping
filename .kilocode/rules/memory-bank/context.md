@@ -42,6 +42,9 @@
 - [x] Added missing Supabase profiles and quotes tables, RLS policies, grants, and realtime publication entries
 - [x] Fixed all stale shipment field references and realtime callback typing errors
 - [x] Re-ran typecheck, lint, environment-aware production build, and browser smoke test successfully
+- [x] Replaced the platform logo asset with the supplied red, gold, and navy ship emblem
+- [x] Fixed build-time Supabase configuration failure with a guarded client fallback and runtime validation
+- [x] Re-ran typecheck, lint, production build, and homepage browser verification successfully
 
 ## Integration Notes
 
