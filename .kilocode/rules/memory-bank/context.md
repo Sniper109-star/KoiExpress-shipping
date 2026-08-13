@@ -1,4 +1,4 @@
-# Active Context: Unifet Logistics Platform
+# Active Context: KoiExpress USA - Global Logistics Platform
 
 ## Current State
 
@@ -34,6 +34,22 @@
 - [x] Added uploaded KoiExpress emblem as the shared public and admin brand logo
 - [x] Built Supabase-backed admin login, protected middleware, dashboard, orders, customers, and admin API routes
 - [x] Added admin signout route and verified typecheck, lint, and production build
+- [x] Updated product positioning from regional logistics to KoiExpress USA - Global
+- [x] Removed stale Unifet, fish-icon, and Lagos/London identity references across public and authenticated surfaces
+- [x] Updated metadata, auth pages, shipment tracking, footer, sidebar, and homepage messaging for worldwide coverage
+- [x] Verified typecheck, lint, production build, and homepage browser rendering
+- [x] Audited Supabase environment usage, client/server auth wiring, shipment query types, and realtime subscriptions
+- [x] Added missing Supabase profiles and quotes tables, RLS policies, grants, and realtime publication entries
+- [x] Fixed all stale shipment field references and realtime callback typing errors
+- [x] Re-ran typecheck, lint, environment-aware production build, and browser smoke test successfully
+- [x] Replaced the platform logo asset with the supplied red, gold, and navy ship emblem
+- [x] Fixed build-time Supabase configuration failure with a guarded client fallback and runtime validation
+- [x] Re-ran typecheck, lint, production build, and homepage browser verification successfully
+- [x] Replaced dashboard and shipments mock data with live Supabase shipment queries
+- [x] Added reusable Supabase Realtime subscriptions for shipments, tracking events, and notifications
+- [x] Connected dashboard tracking to live shipment and tracking-event refreshes
+- [x] Fixed Next.js tracking search-param prerendering with Suspense
+- [x] Verified typecheck, lint, production build, and realtime dashboard/tracking browser routes
 
 ## Integration Notes
 

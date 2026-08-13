@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fish } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 const footerLinks = {
@@ -32,8 +32,8 @@ export function Footer() {
         <div className="grid gap-8 md:gap-12 grid-cols-2 md:grid-cols-6">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Fish className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold tracking-tight">KoiExpress</span>
+              <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={32} height={32} className="size-8 rounded-full object-cover" />
+              <span className="text-xl font-bold tracking-tight">KoiExpress USA - Global</span>
             </Link>
             <p className="text-white/60 text-sm max-w-xs leading-relaxed">
               End-to-end delivery management with real-time tracking. Fast, reliable, and professional.

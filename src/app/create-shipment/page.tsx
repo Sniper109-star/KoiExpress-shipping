@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, Fish, Package } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Package } from "lucide-react";
 import { MapLibreMap } from "@/components/map";
 import { Button } from "@/components/ui/button";
 
@@ -12,8 +13,8 @@ export default function CreateShipmentPage() {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
-            <Fish className="h-5 w-5 text-primary" />
-            <span className="hidden sm:inline">Unifet</span>
+            <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={28} height={28} className="size-7 rounded-full object-cover" />
+            <span className="hidden sm:inline">KoiExpress</span>
           </Link>
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
             <ArrowLeft className="h-4 w-4" />

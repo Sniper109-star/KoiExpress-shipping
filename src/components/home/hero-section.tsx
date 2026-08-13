@@ -12,7 +12,7 @@ export function HeroSection() {
               Fast. Reliable. <span className="text-primary">KoiExpress.</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl">
-              End-to-end delivery management with real-time tracking. From pickup to doorstep, we deliver excellence.
+              USA-based global shipping with real-time tracking. From pickup to doorstep, KoiExpress moves every shipment with confidence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link href="/create-shipment">
