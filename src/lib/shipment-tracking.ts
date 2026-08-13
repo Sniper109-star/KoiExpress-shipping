@@ -45,7 +45,6 @@ export async function getTrackingEvents(shipmentId: string) {
 }
 
 export function subscribeToShipment(shipmentId: string, onChange: () => void) {
-  if (!supabase) return () => undefined
   const channel = supabase.channel(`shipment-${shipmentId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${shipmentId}` }, onChange)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tracking_events', filter: `shipment_id=eq.${shipmentId}` }, onChange)

@@ -45,6 +45,11 @@
 - [x] Replaced the platform logo asset with the supplied red, gold, and navy ship emblem
 - [x] Fixed build-time Supabase configuration failure with a guarded client fallback and runtime validation
 - [x] Re-ran typecheck, lint, production build, and homepage browser verification successfully
+- [x] Replaced dashboard and shipments mock data with live Supabase shipment queries
+- [x] Added reusable Supabase Realtime subscriptions for shipments, tracking events, and notifications
+- [x] Connected dashboard tracking to live shipment and tracking-event refreshes
+- [x] Fixed Next.js tracking search-param prerendering with Suspense
+- [x] Verified typecheck, lint, production build, and realtime dashboard/tracking browser routes
 
 ## Integration Notes
 
