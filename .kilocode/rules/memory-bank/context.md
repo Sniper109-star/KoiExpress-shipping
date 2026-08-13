@@ -50,6 +50,10 @@
 - [x] Connected dashboard tracking to live shipment and tracking-event refreshes
 - [x] Fixed Next.js tracking search-param prerendering with Suspense
 - [x] Verified typecheck, lint, production build, and realtime dashboard/tracking browser routes
+- [x] Added server-only TrackingMore create-tracking route at `/api/trackingmore/create`
+- [x] Added server-only TrackingMore lookup route at `/api/trackingmore/track`
+- [x] Configured `TRACKINGMORE_API_KEY` as a project environment variable without exposing it to the browser
+- [x] Verified TrackingMore integration with typecheck, lint, and production build
 
 ## Integration Notes
 
