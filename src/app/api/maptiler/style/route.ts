@@ -23,7 +23,6 @@ export async function GET() {
   if (!upstream.ok) return NextResponse.json({ error: "MapTiler style unavailable" }, { status: upstream.status });
   const style = await upstream.json();
   const rewrittenStyle = rewriteUrls(style) as Record<string, unknown>;
-  delete rewrittenStyle.glyphs;
   delete rewrittenStyle.sprite;
   return NextResponse.json(rewrittenStyle, { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } });
 }
