@@ -7,7 +7,7 @@ function rewriteUrls(value: unknown): unknown {
     const url = new URL(value);
     url.searchParams.delete("key");
     const target = url.toString().replaceAll("%7B", "{").replaceAll("%7D", "}");
-    return `/api/maptiler/proxy?target=${target}`;
+    return `/api/maptiler/proxy?target=${encodeURIComponent(target)}`;
   }
   if (Array.isArray(value)) return value.map(rewriteUrls);
   if (value && typeof value === "object") {
@@ -24,5 +24,6 @@ export async function GET() {
   const style = await upstream.json();
   const rewrittenStyle = rewriteUrls(style) as Record<string, unknown>;
   delete rewrittenStyle.sprite;
-  return NextResponse.json(rewrittenStyle, { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } });
+  delete rewrittenStyle.glyphs;
+  return NextResponse.json(rewrittenStyle, { headers: { "Cache-Control": "no-store" } });
 }
