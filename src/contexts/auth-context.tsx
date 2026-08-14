@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { AuthChangeEvent, User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+
+type User = { id: string; email: string; name?: string }
+type Session = { user: User } | null
 
 type AuthContextType = {
   user: User | null
-  session: Session | null
+  session: Session
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, fullName: string, role?: string) => Promise<void>
@@ -14,61 +15,42 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+async function authRequest(path: string, body?: Record<string, string>) {
+  const response = await fetch(`/api/auth/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload?.message ?? 'Authentication request failed')
+  return payload
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: initialSession } }: { data: { session: Session | null } }) => {
-      setSession(initialSession)
-      setUser(initialSession?.user ?? null)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, newSession: Session | null) => {
-      setSession(newSession)
-      setUser(newSession?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    fetch('/api/auth/get-session').then((response) => response.ok ? response.json() : null).then((payload) => {
+      const nextUser = payload?.user ?? payload?.session?.user ?? null
+      setUser(nextUser)
+      setSession(nextUser ? { user: nextUser } : null)
+    }).finally(() => setLoading(false))
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
+    const payload = await authRequest('sign-in/email', { email, password })
+    const nextUser = payload?.user ?? payload?.session?.user
+    setUser(nextUser)
+    setSession(nextUser ? { user: nextUser } : null)
   }
-
-  const signUp = async (email: string, password: string, fullName: string, role = 'customer') => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? `${window.location.origin}/auth/callback`,
-        data: {
-          full_name: fullName,
-          role
-        }
-      }
-    })
-    if (error) throw error
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const payload = await authRequest('sign-up/email', { email, password, name: fullName })
+    const nextUser = payload?.user ?? payload?.session?.user
+    setUser(nextUser)
+    setSession(nextUser ? { user: nextUser } : null)
   }
+  const signOut = async () => { await authRequest('sign-out'); setUser(null); setSession(null) }
+  const resetPassword = async (email: string) => { await authRequest('request-password-reset', { email, redirectTo: `${window.location.origin}/reset-password` }) }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
-  }
-
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email)
-    if (error) throw error
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, resetPassword }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, resetPassword }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Download, Radio } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { subscribeToTable } from "@/lib/realtime";
 
 type Shipment = {
@@ -38,14 +37,12 @@ export default function ShipmentsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const loadShipments = useCallback(async () => {
-    const { data, error: queryError } = await supabase
-      .from("shipments")
-      .select("id, tracking_number, origin, destination, status, created_at")
-      .order("created_at", { ascending: false });
-    if (queryError) {
+    const response = await fetch("/api/shipments/live?limit=100", { cache: "no-store" });
+    if (!response.ok) {
       setError("Unable to load shipments right now.");
     } else {
-      setShipments((data ?? []) as Shipment[]);
+      const payload = await response.json();
+      setShipments((payload.shipments ?? []) as Shipment[]);
       setError(null);
     }
     setLoading(false);

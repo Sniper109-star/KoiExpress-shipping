@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { desc } from "drizzle-orm";
 import { getAdminUser } from "@/lib/admin-auth";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { shipments } from "@/lib/db/schema";
 
 export async function GET() {
   if (!await getAdminUser()) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("shipments").select("*").order("updated_at", { ascending: false });
-  if (error) return NextResponse.json({ error: "Unable to load orders" }, { status: 500 });
-  return NextResponse.json({ success: true, orders: data });
+  const orders = await db.select().from(shipments).orderBy(desc(shipments.updatedAt));
+  return NextResponse.json({ success: true, orders });
 }

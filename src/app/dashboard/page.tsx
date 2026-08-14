@@ -6,7 +6,6 @@ import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, TrendingUp, Clock, MapPin, Plus, Radio } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { subscribeToTable } from "@/lib/realtime";
 
 type Shipment = { id: string; tracking_number: string; origin: string; destination: string; status: string; created_at: string };
@@ -21,8 +20,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const loadShipments = useCallback(async () => {
-    const { data } = await supabase.from("shipments").select("id, tracking_number, origin, destination, status, created_at").order("created_at", { ascending: false });
-    setShipments((data ?? []) as Shipment[]);
+    const response = await fetch("/api/shipments/live", { cache: "no-store" });
+    const payload = await response.json();
+    setShipments((payload.shipments ?? []) as Shipment[]);
     setLoading(false);
   }, []);
 
