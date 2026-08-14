@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const { name, email, subject, message } = parsed.data;
   const result = await resend.emails.send({
     from: "KoiExpress Support <onboarding@resend.dev>",
-    to: [process.env.SUPPORT_EMAIL ?? email],
+    to: [process.env.SUPPORT_EMAIL ?? "Vicities56@gmail.com"],
     replyTo: email,
     subject: `[Support] ${subject}`,
     text: `From: ${name} <${email}>\n\n${message}`,
