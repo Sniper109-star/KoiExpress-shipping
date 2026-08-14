@@ -77,6 +77,8 @@
 - [x] Added private Vercel Blob upload and authenticated document delivery routes
 - [x] Installed `@vercel/blob` 2.x and passed typecheck and lint
 - [x] Verified the public homepage in the browser at desktop dark mode
+- [x] Removed public demo tracking hint and added accessible custom Smartsupp support button
+- [x] Added admin credential configuration validation; current project values contain literal `process.env` text and must be replaced with actual secret values before login can succeed
 
 ## Integration Notes
 

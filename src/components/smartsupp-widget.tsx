@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageCircle } from "lucide-react";
 import Script from "next/script";
 
 export function SmartsuppWidget() {
@@ -24,6 +25,16 @@ window.smartsupp || (function (d) {
   s.parentNode.insertBefore(c, s);
 })(document);`}
       </Script>
+      <button
+        type="button"
+        aria-label="Open live support chat"
+        title="Open live support chat"
+        onClick={() => window.smartsupp?.("chat:open")}
+        className="fixed bottom-5 right-5 z-50 flex size-14 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary text-primary-foreground shadow-xl transition hover:scale-105 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        <MessageCircle aria-hidden="true" className="size-6" />
+        <span className="sr-only">Open live support chat</span>
+      </button>
     </>
   );
 }
