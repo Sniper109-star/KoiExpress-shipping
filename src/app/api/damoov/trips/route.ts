@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const DAMOOV_TRIPS_URL = "https://api.telematicssdk.com/trips/get/admin/v1/short";
 
 export async function POST(request: NextRequest) {
-  const token = process.env.JWT;
+  const token = process.env.DAMOOV_JWT;
   if (!token) return NextResponse.json({ error: "Damoov is not configured" }, { status: 503 });
 
   const body = await request.json().catch(() => ({}));
