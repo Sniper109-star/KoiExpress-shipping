@@ -15,7 +15,7 @@ function encodeBytes(value: ArrayBuffer) {
 }
 
 function secret() {
-  return process.env.SUPABASE_JWT_SECRET ?? process.env.PASSWORD ?? 'development-only-admin-secret'
+  return process.env.BETTER_AUTH_SECRET ?? process.env.PASSWORD_2 ?? 'development-only-admin-secret'
 }
 
 async function signature(payload: string) {
@@ -40,5 +40,5 @@ export async function verifyAdminSession(token: string | undefined) {
   if (expected.length !== provided.length) return null
   let mismatch = 0
   for (let index = 0; index < expected.length; index += 1) mismatch |= expected.charCodeAt(index) ^ provided.charCodeAt(index)
-  return mismatch === 0 && email === process.env.EMAIL ? { email } : null
+  return mismatch === 0 && email === process.env.EMAIL_2 ? { email } : null
 }

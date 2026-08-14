@@ -32,7 +32,7 @@ export function Footer() {
         <div className="grid gap-8 md:gap-12 grid-cols-2 md:grid-cols-6">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={32} height={32} className="size-8 rounded-full object-cover" />
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000774c81f4b27cbfff2a71b99c-6Zm6eM3G30MndkZwiO1EckpKT3tAk6.png" alt="UNIFET logistics platform logo" width={40} height={40} className="size-10 object-contain" />
               <span className="text-xl font-bold tracking-tight">Unifet Logistics</span>
             </Link>
             <p className="text-white/60 text-sm max-w-xs leading-relaxed">

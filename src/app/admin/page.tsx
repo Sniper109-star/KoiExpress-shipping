@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
     <main className="min-h-screen bg-background px-6 py-12 text-foreground">
       <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-md flex-col justify-center">
         <div className="mb-8 flex items-center gap-4">
-          <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={68} height={68} className="size-16 rounded-full border-2 border-[#dcb45a] object-cover" />
+          <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000774c81f4b27cbfff2a71b99c-6Zm6eM3G30MndkZwiO1EckpKT3tAk6.png" alt="UNIFET logistics platform logo" width={88} height={88} className="size-20 object-contain" />
           <div><p className="font-mono text-xs uppercase tracking-[0.24em] text-primary">Unifet Logistics</p><h1 className="font-serif text-3xl font-bold">Operations portal</h1></div>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 shadow-2xl">

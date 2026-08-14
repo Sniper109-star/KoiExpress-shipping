@@ -13,7 +13,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
-          <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={38} height={38} className="size-9 rounded-full object-cover" />
+          <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000774c81f4b27cbfff2a71b99c-6Zm6eM3G30MndkZwiO1EckpKT3tAk6.png" alt="UNIFET logistics platform logo" width={38} height={38} className="size-9 object-contain" />
           <span>Unifet <span className="font-normal text-muted-foreground">Logistics</span></span>
         </Link>
 
