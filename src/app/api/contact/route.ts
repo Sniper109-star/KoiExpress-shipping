@@ -12,7 +12,7 @@ const schema = z.object({
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Please check your submission." }, { status: 400 });
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.API;
   if (!apiKey) return NextResponse.json({ error: "Email service is not configured." }, { status: 503 });
   if (request.headers.get("x-resend-dry-run") === "true") {
     return NextResponse.json({ ok: true, dryRun: true, configured: true });
