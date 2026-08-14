@@ -16,7 +16,7 @@ function rewriteUrls(value: unknown): unknown {
 }
 
 export async function GET() {
-  const key = process.env.key;
+  const key = process.env.MAPTILER_API_KEY;
   if (!key) return NextResponse.json({ error: "MapTiler is not configured" }, { status: 503 });
   const upstream = await fetch(`${MAPTILER_BASE}/maps/streets-v2/style.json?key=${encodeURIComponent(key)}`, { next: { revalidate: 3600 } });
   if (!upstream.ok) return NextResponse.json({ error: "MapTiler style unavailable" }, { status: upstream.status });

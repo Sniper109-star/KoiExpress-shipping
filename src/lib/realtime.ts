@@ -6,5 +6,5 @@ export function subscribeToTable(_table: RealtimeTable, onChange: () => void, _f
 }
 
 export function subscribeToUserNotifications(userId: string, onChange: () => void) {
-  return subscribeToTable("notifications", onChange, `user_id=eq.${userId}`)
+  return subscribeToTable("notifications", onChange, `user_id=${userId}`)
 }

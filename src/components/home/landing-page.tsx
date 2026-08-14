@@ -23,7 +23,6 @@ import {
   Warehouse,
   Zap,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { LiveShipmentFeed } from "./live-shipment-feed";
 
@@ -55,12 +54,13 @@ export function LandingPage() {
   const [quoteSaved, setQuoteSaved] = useState(false);
 
   useEffect(() => {
-    if (!trackedShipment?.id) return;
-    const channel = supabase.channel(`shipment-${trackedShipment.id}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "shipments", filter: `id=eq.${trackedShipment.id}` }, (payload) => setTrackedShipment(payload.new as { id: string; tracking_number: string; origin: string; destination: string; status: string }))
-      .subscribe();
-    return () => { void supabase.removeChannel(channel); };
-  }, [trackedShipment?.id]);
+    if (!trackedShipment?.tracking_number) return;
+    const refresh = () => fetch(`/api/track/${encodeURIComponent(trackedShipment.tracking_number)}`, { cache: "no-store" }).then((response) => response.json()).then((payload) => {
+      if (payload.shipment) setTrackedShipment(payload.shipment);
+    }).catch(() => undefined);
+    const interval = window.setInterval(refresh, 15000);
+    return () => window.clearInterval(interval);
+  }, [trackedShipment?.tracking_number]);
 
   const estimate = useMemo(() => {
     const weight = Math.max(Number(quote.weight) || 1, 1);
@@ -71,19 +71,22 @@ export function LandingPage() {
 
   async function trackShipment() {
     if (!trackingNumber.trim()) return;
-    const { data } = await supabase.from("shipments").select("id, tracking_number, origin, destination, status").eq("tracking_number", trackingNumber.trim()).maybeSingle();
-    setTrackedShipment(data);
+    const response = await fetch(`/api/track/${encodeURIComponent(trackingNumber.trim())}`, { cache: "no-store" });
+    const payload = await response.json();
+    setTrackedShipment(payload.shipment ?? null);
   }
 
   async function saveQuote() {
     if (!quote.pickup || !quote.destination || !quote.weight) return;
-    const { error } = await supabase.from("quotes").insert({ pickup_location: quote.pickup, destination: quote.destination, package_type: quote.type, weight: Number(quote.weight), dimensions: quote.dimensions || null, delivery_speed: quote.speed, estimated_cost: estimate });
-    setQuoteSaved(!error);
+    const response = await fetch("/api/quotes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pickup: quote.pickup, destination: quote.destination, packageType: quote.type, weight: Number(quote.weight), dimensions: quote.dimensions || null, speed: quote.speed, estimate }) });
+    setQuoteSaved(response.ok);
   }
 
   return (
     <main className="bg-background text-foreground">
-      <section className="border-b border-border bg-secondary text-secondary-foreground">
+      <section className="relative isolate overflow-hidden border-b border-border bg-secondary text-secondary-foreground">
+        <div className="absolute inset-0 -z-10 bg-cover bg-center" style={{ backgroundImage: "url(https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000763081f4818817917022ce9d-w5RgniLxpPRhSeVpWzFS9vnpgcr4cs.png)" }} aria-hidden="true" />
+        <div className="absolute inset-0 -z-10 bg-secondary/75" aria-hidden="true" />
         <div className="mx-auto flex max-w-7xl flex-col gap-12 px-5 py-20 md:px-8 md:py-28 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="mb-6 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/70"><span className="size-2 rounded-full bg-primary" />Unifet logistics</p>
