@@ -28,6 +28,15 @@ export type TrackingEvent = {
   created_at: string
 }
 
+function toEvent(row: Record<string, unknown>): TrackingEvent {
+  return {
+    id: String(row.id), shipment_id: String(row.shipmentId ?? row.shipment_id),
+    status: String(row.status), location: (row.location as string | null) ?? null,
+    latitude: (row.latitude as number | null) ?? null, longitude: (row.longitude as number | null) ?? null,
+    message: String(row.message ?? "Shipment updated"), created_at: String(row.createdAt ?? row.created_at),
+  }
+}
+
 function toShipment(row: Record<string, unknown>): TrackingShipment {
   return {
     id: String(row.id), tracking_number: String(row.trackingNumber ?? row.tracking_number),
@@ -48,8 +57,8 @@ export async function findShipment(trackingNumber: string) {
   if (normalized.length < 3) return null
   const response = await fetch(`/api/track/${encodeURIComponent(normalized)}`, { cache: "no-store" })
   if (!response.ok) throw new Error("Unable to load shipment")
-  const result = await response.json() as { shipment: Record<string, unknown> | null }
-  return result.shipment ? toShipment(result.shipment) : null
+  const result = await response.json() as { shipment: Record<string, unknown> | null; events?: Record<string, unknown>[] }
+  return result.shipment ? { shipment: toShipment(result.shipment), events: (result.events ?? []).map(toEvent) } : null
 }
 
 export async function getTrackingEvents(shipmentId: string) {

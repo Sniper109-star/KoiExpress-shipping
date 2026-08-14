@@ -13,8 +13,8 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
-          <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={38} height={38} className="size-9 rounded-full object-cover" />
-          <span>KoiExpress</span>
+          <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={38} height={38} className="size-9 rounded-full object-cover" />
+          <span>Unifet <span className="font-normal text-muted-foreground">Logistics</span></span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-2">

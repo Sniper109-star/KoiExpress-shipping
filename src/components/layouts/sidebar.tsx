@@ -38,9 +38,9 @@ function Sidebar({ className, isCollapsed }: SidebarProps) {
       )}
     >
       <div className="flex items-center gap-3 h-16 px-4 border-b border-white/10">
-        <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={34} height={34} className="size-8 rounded-full object-cover flex-shrink-0" />
+        <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={34} height={34} className="size-8 rounded-full object-cover flex-shrink-0" />
         {!isCollapsed && (
-          <span className="text-lg font-bold tracking-tight">KoiExpress</span>
+          <span className="text-lg font-bold tracking-tight">Unifet</span>
         )}
       </div>
 
