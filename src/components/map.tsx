@@ -55,6 +55,7 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     });
     map.current = instance;
     instance.addControl(new maplibregl.NavigationControl(), "top-right");
+    instance.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }), "top-right");
     instance.on("load", () => {
       const line = route.length > 1 ? route : origin && destination ? [origin, destination] : [];
       if (line.length > 1) {

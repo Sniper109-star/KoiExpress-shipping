@@ -82,6 +82,7 @@
 - [x] Added Neon shipping-engine tables, Drizzle models, user-scoped rate calculation, label purchase, tracking, cancellation, and idempotent webhook routes
 - [x] Wired the customer shipment form to the Neon shipping-engine rate and label workflow with parcel validation, carrier comparison, label download, and print actions
 - [x] Verified shipping-engine typecheck, lint, production build, Neon tables, and dashboard/create browser rendering
+- [x] Added MapTiler address autocomplete with server-side geocoding, shipment coordinate capture, live landing-page route map, and browser-verified map frontend integration
 
 ## Integration Notes
 

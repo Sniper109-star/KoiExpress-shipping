@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapLibreMap } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -15,21 +15,9 @@ export function MapPreviewSection() {
         </div>
 
         <Card variant="default" className="relative overflow-hidden rounded-xl border-2 border-red-100 p-0">
-          <div className="flex flex-col md:flex-row items-center justify-center h-[300px] md:h-[400px] bg-gradient-to-br from-red-50 via-white to-red-50">
-            <div className="text-center space-y-4">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-                <MapPin className="h-10 w-10 text-primary" />
-              </div>
-              <p className="text-lg font-semibold text-dark">Interactive Map</p>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Live GPS tracking with real-time driver location and estimated delivery times.
-              </p>
-              <Link href="/track">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-                  Try Live Tracking
-                </Button>
-              </Link>
-            </div>
+          <div className="relative h-[300px] md:h-[400px]">
+            <MapLibreMap className="h-full w-full rounded-none border-0" origin={[-74.006, 40.7128]} destination={[-73.935, 40.7306]} route={[[-74.006, 40.7128], [-73.98, 40.72], [-73.935, 40.7306]]} />
+            <div className="absolute bottom-4 left-4 rounded-lg bg-background/95 p-3 shadow-lg backdrop-blur"><p className="text-sm font-semibold text-foreground">Live shipment visibility</p><p className="text-xs text-muted-foreground">Pickup, route, and delivery in one view.</p></div>
           </div>
           <div className="absolute top-4 right-4">
             <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-600 border border-green-200">

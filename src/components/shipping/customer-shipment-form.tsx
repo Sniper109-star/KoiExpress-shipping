@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ArrowRight, Check, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AddressAutocomplete } from "@/components/shipping/address-autocomplete"
 
 type Address = { name: string; street1: string; city: string; state: string; postalCode: string; country: string }
 type Parcel = { weightKg: string; lengthCm: string; widthCm: string; heightCm: string; itemType: string }
@@ -17,6 +18,8 @@ const emptyParcel = { weightKg: "", lengthCm: "", widthCm: "", heightCm: "", ite
 export function CustomerShipmentForm() {
   const [from, setFrom] = useState<Address>({ ...emptyAddress })
   const [to, setTo] = useState<Address>({ ...emptyAddress })
+  const [originCoordinates, setOriginCoordinates] = useState<[number, number] | undefined>()
+  const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | undefined>()
   const [parcels, setParcels] = useState<Parcel[]>([{ ...emptyParcel }])
   const [declaredValue, setDeclaredValue] = useState("")
   const [rates, setRates] = useState<Rate[]>([])
@@ -35,8 +38,8 @@ export function CustomerShipmentForm() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        origin: from,
-        destination: to,
+        origin: { ...from, coordinates: originCoordinates },
+        destination: { ...to, coordinates: destinationCoordinates },
         parcels: parcels.map((parcel) => ({
           weight: Number(parcel.weightKg),
           weightUnit: "kg",
@@ -61,7 +64,7 @@ export function CustomerShipmentForm() {
     setLabelUrl(payload.label?.labelUrl ?? null)
     setMessage(`Label purchased. Tracking number: ${payload.trackingNumber}`)
   }
-  const addressFields = (side: "from" | "to", value: Address) => <div className="grid gap-3 sm:grid-cols-2">{(["name", "street1", "city", "state", "postalCode", "country"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium sm:col-span-1">{key === "street1" ? "Street address" : key === "postalCode" ? "Postal code" : key[0].toUpperCase() + key.slice(1)}<input required={key === "street1" || key === "city" || key === "postalCode"} value={value[key]} onChange={(event) => updateAddress(side, key, event.target.value)} className="h-11 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:border-primary" /></label>)}</div>
+  const addressFields = (side: "from" | "to", value: Address) => <div className="grid gap-3 sm:grid-cols-2">{(["name", "street1", "city", "state", "postalCode", "country"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium sm:col-span-1">{key === "street1" ? "Street address" : key === "postalCode" ? "Postal code" : key[0].toUpperCase() + key.slice(1)}{key === "street1" ? <AddressAutocomplete value={value[key]} onChange={(nextValue) => updateAddress(side, key, nextValue)} onSelect={(suggestion) => side === "from" ? setOriginCoordinates(suggestion.coordinates) : setDestinationCoordinates(suggestion.coordinates)} placeholder="Start typing an address" /> : <input required={key === "city" || key === "postalCode"} value={value[key]} onChange={(event) => updateAddress(side, key, event.target.value)} className="h-11 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:border-primary" />}</label>)}</div>
   return <div className="flex flex-col gap-7">
     <section className="flex flex-col gap-4"><div><h2 className="text-lg font-semibold">Route details</h2><p className="text-sm text-muted-foreground">Where should we collect and deliver your shipment?</p></div><div className="grid gap-5 lg:grid-cols-2"><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">Sender</p>{addressFields("from", from)}</div><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">Receiver</p>{addressFields("to", to)}</div></div></section>
     <section className="flex flex-col gap-4"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">Packages</h2><p className="text-sm text-muted-foreground">Add weight and dimensions for each parcel.</p></div><Button type="button" variant="outline" size="sm" onClick={() => setParcels((current) => [...current, { ...emptyParcel }])}><Plus data-icon="inline-start" />Add parcel</Button></div>{parcels.map((parcel, index) => <div key={index} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-5"><label className="flex flex-col gap-1 text-sm font-medium">Weight kg<input required type="number" min="0.1" step="0.1" value={parcel.weightKg} onChange={(event) => updateParcel(index, "weightKg", event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>{(["lengthCm", "widthCm", "heightCm"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium">{key.replace("Cm", " cm")}<input type="number" min="1" value={parcel[key]} onChange={(event) => updateParcel(index, key, event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>)}<label className="flex flex-col gap-1 text-sm font-medium">Item type<input value={parcel.itemType} onChange={(event) => updateParcel(index, "itemType", event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>{parcels.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setParcels((current) => current.filter((_, parcelIndex) => parcelIndex !== index))} aria-label="Remove parcel"><Trash2 data-icon="inline-start" />Remove</Button>}</div>)}<label className="flex max-w-xs flex-col gap-1 text-sm font-medium">Declared value (USD)<input type="number" min="0" step="0.01" value={declaredValue} onChange={(event) => setDeclaredValue(event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label></section>
