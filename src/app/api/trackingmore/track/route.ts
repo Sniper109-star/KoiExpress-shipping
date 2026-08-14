@@ -21,8 +21,8 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     const payload = await response.json().catch(() => null);
-    if (!response.ok) return NextResponse.json({ error: "Tracking provider rejected the request." }, { status: response.status >= 400 && response.status < 500 ? response.status : 502 });
-    return NextResponse.json(payload);
+    if (!response.ok) return NextResponse.json({ error: "Tracking provider rejected the request.", details: payload?.meta?.message ?? payload?.message }, { status: response.status >= 400 && response.status < 500 ? response.status : 502 });
+    return NextResponse.json(payload, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Tracking provider is temporarily unavailable." }, { status: 502 });
   }
