@@ -4,8 +4,8 @@
 @theme inline {
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --color-primary: #ff6847;
-  --color-primary-foreground: #07101f;
+  --color-primary: #c62828;
+  --color-primary-foreground: #fff7f7;
   --color-secondary: #0a1630;
   --color-secondary-foreground: #f4f8ff;
   --color-accent: #12294f;
@@ -18,7 +18,7 @@
   --color-muted-foreground: #9eacc5;
   --color-border: #20385f;
   --color-input: #29456f;
-  --color-ring: #ff6847;
+  --color-ring: #c62828;
   --color-success: #55d6a3;
   --color-success-foreground: #07101f;
 }
@@ -38,7 +38,7 @@
     --card-foreground: #f4f8ff;
     --popover: #0c1b37;
     --popover-foreground: #f4f8ff;
-    --primary: #ff6847;
+    --primary: #c62828;
     --primary-foreground: #07101f;
     --secondary: #0a1630;
     --secondary-foreground: #f4f8ff;
