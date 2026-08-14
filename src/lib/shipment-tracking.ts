@@ -66,6 +66,8 @@ export async function getTrackingEvents(shipmentId: string) {
 }
 
 export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
-  const interval = window.setInterval(onChange, 15000)
-  return () => window.clearInterval(interval)
+  const source = new EventSource("/api/shipments/stream")
+  source.addEventListener("shipment.updated", onChange)
+  source.addEventListener("shipments", onChange)
+  return () => source.close()
 }
