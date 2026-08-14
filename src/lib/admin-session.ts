@@ -15,7 +15,9 @@ function encodeBytes(value: ArrayBuffer) {
 }
 
 function secret() {
-  return process.env.BETTER_AUTH_SECRET ?? process.env.PASSWORD_2 ?? 'development-only-admin-secret'
+  const value = process.env.BETTER_AUTH_SECRET
+  if (!value) throw new Error("BETTER_AUTH_SECRET is required for admin sessions")
+  return value
 }
 
 async function signature(payload: string) {
