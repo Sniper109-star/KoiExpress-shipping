@@ -1,6 +1,7 @@
 import "server-only"
 import type { AdapterCapabilities, Address, Label, Rate, ShipmentDraft, ShippingAdapter, Tracking } from "../../../../packages/core/src"
 
+const ADAPTER_MODE = process.env.ADAPTER_MODE ?? "mock"
 const KARRIO_URL = process.env.KARRIO_URL?.replace(/\/$/, "")
 
 function localRates(input: ShipmentDraft): Rate[] {
@@ -37,4 +38,5 @@ export class KarrioCompatibleAdapter implements ShippingAdapter {
   async validateAddress(address: Address) { return { valid: Boolean(address.city && address.country), normalized: address } }
 }
 
+if (ADAPTER_MODE !== "mock" && ADAPTER_MODE !== "karrio") throw new Error(`Unsupported ADAPTER_MODE: ${ADAPTER_MODE}`)
 export const shippingAdapter: ShippingAdapter = new KarrioCompatibleAdapter()
