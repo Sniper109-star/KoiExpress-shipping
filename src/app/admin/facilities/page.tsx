@@ -1,0 +1,10 @@
+import { desc } from "drizzle-orm"
+import { MapPinned, Warehouse } from "lucide-react"
+import { db } from "@/lib/db"
+import { facilities } from "@/lib/db/schema"
+
+export default async function FacilitiesPage() {
+  let rows: typeof facilities.$inferSelect[] = []
+  try { rows = await db.select().from(facilities).orderBy(desc(facilities.createdAt)) } catch { rows = [] }
+  return <section className="flex flex-col gap-6"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="font-mono text-xs uppercase tracking-[0.22em] text-[#df3038]">Network / physical operations</p><h1 className="mt-2 text-4xl font-semibold tracking-tight">Facilities</h1><p className="mt-2 text-[#9fb4c3]">Warehouses, distribution centers, and pickup locations.</p></div><button className="inline-flex items-center gap-2 rounded-xl bg-[#df3038] px-4 py-3 text-sm font-semibold text-white"><Warehouse className="size-4" /> Add facility</button></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{rows.map((facility) => <article key={facility.id} className="rounded-2xl border border-[#1d3548] bg-[#0a1a2b] p-5"><div className="flex items-start justify-between"><div className="flex size-10 items-center justify-center rounded-xl bg-[#173653] text-[#9bc8ee]"><MapPinned className="size-5" /></div><span className="rounded-full bg-[#123e31] px-3 py-1 text-xs font-semibold capitalize text-[#8be0ba]">{facility.operatingStatus}</span></div><h2 className="mt-5 text-lg font-semibold">{facility.name}</h2><p className="mt-2 text-sm text-[#9fb4c3]">{facility.address || "Address not recorded"}</p><p className="mt-1 text-xs text-[#6f8797]">{facility.country || "Country not recorded"}</p></article>)}{!rows.length ? <div className="rounded-2xl border border-dashed border-[#1d3548] p-14 text-center md:col-span-2 xl:col-span-3"><p className="font-semibold">No facilities configured.</p><p className="mt-2 text-sm text-[#9fb4c3]">Add your first warehouse or distribution center to assign shipments.</p></div> : null}</div></section>
+}
