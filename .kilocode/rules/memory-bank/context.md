@@ -70,10 +70,19 @@
 - [x] Added branded homepage live shipment feed backed by Supabase shipments and realtime updates
 - [x] Added company email `Vicities56@gmail.com` to the homepage footer and contact routing fallback
 - [x] Verified homepage browser rendering, Resend dry-run, typecheck, lint, and production build
+- [x] Connected Neon and validated the logistics schema through Neon MCP with one-statement-at-a-time DDL
+- [x] Added Neon compatibility columns for the existing Drizzle query layer
+- [x] Fixed MapTiler and Damoov routes to use `MAPTILER_API_KEY` and `DAMOOV_JWT`
+- [x] Hardened signed admin sessions to use `EMAIL` and `PASSWORD`
+- [x] Added private Vercel Blob upload and authenticated document delivery routes
+- [x] Installed `@vercel/blob` 2.x and passed typecheck and lint
+- [x] Verified the public homepage in the browser at desktop dark mode
 
 ## Integration Notes
 
-Supabase is the only backend for shipment data and realtime updates. Public tracking reads shipment and tracking event rows, while authenticated write policies scope changes to the owning user.
+Neon is the relational backend for shipment data, customers, addresses, tracking events, invoices, documents, notifications, and Better Auth sessions. Vercel Blob private storage is used for shipment labels, PDFs, and documents; private files are served through authenticated delivery routes. Dashboard live updates use Neon-backed server APIs with polling/SSE rather than Supabase Realtime. MapTiler is accessed through server-side proxy routes with `MAPTILER_API_KEY`; Resend, Smartsupp, and Damoov credentials remain server-side.
+
+The Neon schema was validated and created incrementally through Neon MCP, including profiles, customers, addresses, shipments, tracking_events, shipment_documents, invoices, and notifications. Compatibility columns were added to align the live tables with the existing Drizzle query layer.
 
 ## Current Structure
 
