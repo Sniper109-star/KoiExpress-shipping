@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
+import { eq } from "drizzle-orm"
 import { z } from "zod"
+import { db } from "@/lib/db"
+import { shipments } from "@/lib/db/schema"
 import { getAdminUser } from "@/lib/admin-auth"
-import { createAdminDatabaseClient } from "@/lib/supabase/admin"
 
 const updateSchema = z.object({
   id: z.string().uuid(),
@@ -16,9 +18,15 @@ export async function PATCH(request: Request) {
   if (!await getAdminUser()) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
   const parsed = updateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid shipment update" }, { status: 400 })
-  const { id, ...changes } = parsed.data
-  const supabase = createAdminDatabaseClient()
-  const { data, error } = await supabase.from("shipments").update({ ...changes, updated_at: new Date().toISOString() }).eq("id", id).select().single()
-  if (error) return NextResponse.json({ error: "Unable to update shipment" }, { status: 500 })
-  return NextResponse.json({ shipment: data })
+  const { id, status, driver_name, vehicle, eta, last_update } = parsed.data
+  const [shipment] = await db.update(shipments).set({
+    ...(status === undefined ? {} : { status }),
+    ...(driver_name === undefined ? {} : { driverName: driver_name }),
+    ...(vehicle === undefined ? {} : { vehicle }),
+    ...(eta === undefined ? {} : { eta: eta ? new Date(eta) : null }),
+    ...(last_update === undefined ? {} : { lastUpdate: last_update }),
+    updatedAt: new Date(),
+  }).where(eq(shipments.id, id)).returning()
+  if (!shipment) return NextResponse.json({ error: "Shipment not found" }, { status: 404 })
+  return NextResponse.json({ shipment })
 }

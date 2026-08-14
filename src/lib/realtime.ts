@@ -1,26 +1,10 @@
-import { supabase } from '@/lib/supabase'
+export type RealtimeTable = "shipments" | "tracking_events" | "notifications"
 
-export type RealtimeTable = 'shipments' | 'tracking_events' | 'notifications'
-
-export function subscribeToTable(
-  table: RealtimeTable,
-  onChange: () => void,
-  filter?: string,
-) {
-  const channel = supabase
-    .channel(`realtime-${table}-${filter ?? 'all'}`)
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table, ...(filter ? { filter } : {}) },
-      onChange,
-    )
-    .subscribe()
-
-  return () => {
-    void supabase.removeChannel(channel)
-  }
+export function subscribeToTable(_table: RealtimeTable, onChange: () => void, _filter?: string) {
+  const interval = window.setInterval(onChange, 15000)
+  return () => window.clearInterval(interval)
 }
 
 export function subscribeToUserNotifications(userId: string, onChange: () => void) {
-  return subscribeToTable('notifications', onChange, `user_id=eq.${userId}`)
+  return subscribeToTable("notifications", onChange, `user_id=eq.${userId}`)
 }
