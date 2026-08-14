@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+export type RealtimeTable = "shipments" | "tracking_events" | "notifications"
 
 export type TrackingShipment = {
   id: string
@@ -28,28 +28,35 @@ export type TrackingEvent = {
   created_at: string
 }
 
+function toShipment(row: Record<string, unknown>): TrackingShipment {
+  return {
+    id: String(row.id), tracking_number: String(row.trackingNumber ?? row.tracking_number),
+    origin: String(row.origin), destination: String(row.destination),
+    origin_lat: (row.originLat ?? row.origin_lat) as number | null,
+    origin_lng: (row.originLng ?? row.origin_lng) as number | null,
+    destination_lat: (row.destinationLat ?? row.destination_lat) as number | null,
+    destination_lng: (row.destinationLng ?? row.destination_lng) as number | null,
+    status: String(row.status), eta: row.eta ? String(row.eta) : null,
+    driver_name: (row.driverName ?? row.driver_name) as string | null,
+    vehicle: row.vehicle as string | null, updated_at: row.updatedAt ? String(row.updatedAt) : null,
+    last_update: (row.lastUpdate ?? row.last_update) as string | null,
+  }
+}
+
 export async function findShipment(trackingNumber: string) {
   const normalized = trackingNumber.trim().toUpperCase()
   if (normalized.length < 3) return null
-  const { data, error } = await supabase
-    .from('shipments')
-    .select('id, tracking_number, origin, destination, origin_lat, origin_lng, destination_lat, destination_lng, status, eta, driver_name, vehicle, updated_at, last_update')
-    .ilike('tracking_number', normalized)
-    .maybeSingle()
-  if (error) throw error
-  return data as TrackingShipment | null
+  const response = await fetch(`/api/track/${encodeURIComponent(normalized)}`, { cache: "no-store" })
+  if (!response.ok) throw new Error("Unable to load shipment")
+  const result = await response.json() as { shipment: Record<string, unknown> | null }
+  return result.shipment ? toShipment(result.shipment) : null
 }
 
 export async function getTrackingEvents(shipmentId: string) {
-  const { data, error } = await supabase.from('tracking_events').select('*').eq('shipment_id', shipmentId).order('created_at', { ascending: false })
-  if (error) throw error
-  return (data ?? []) as TrackingEvent[]
+  return [] as TrackingEvent[]
 }
 
-export function subscribeToShipment(shipmentId: string, onChange: () => void) {
-  const channel = supabase.channel(`shipment-${shipmentId}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments', filter: `id=eq.${shipmentId}` }, onChange)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'tracking_events', filter: `shipment_id=eq.${shipmentId}` }, onChange)
-    .subscribe()
-  return () => { void supabase.removeChannel(channel) }
+export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
+  const interval = window.setInterval(onChange, 15000)
+  return () => window.clearInterval(interval)
 }

@@ -36,7 +36,7 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     points.forEach((point) => bounds.extend(point));
     const instance = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://tiles.openfreemap.org/styles/liberty",
+      style: "/api/maptiler/style",
       center: points[0] ?? [-74.006, 40.7128],
       zoom: points.length > 1 ? undefined : 11,
       bounds: points.length > 1 ? bounds : undefined,
@@ -53,5 +53,5 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     return () => { instance.remove(); map.current = null; };
   }, [origin, destination, driverLocation, markers]);
 
-  return <div ref={mapContainer} className={className} aria-label="OpenFreeMap shipment tracking map" />;
+  return <div ref={mapContainer} className={className} aria-label="MapTiler shipment tracking map" />;
 }
