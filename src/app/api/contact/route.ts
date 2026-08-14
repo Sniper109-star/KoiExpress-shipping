@@ -14,6 +14,9 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Please check your submission." }, { status: 400 });
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Email service is not configured." }, { status: 503 });
+  if (request.headers.get("x-resend-dry-run") === "true") {
+    return NextResponse.json({ ok: true, dryRun: true, configured: true });
+  }
   const resend = new Resend(apiKey);
   const { name, email, subject, message } = parsed.data;
   const result = await resend.emails.send({

@@ -54,6 +54,12 @@
 - [x] Added server-only TrackingMore lookup route at `/api/trackingmore/track`
 - [x] Configured `TRACKINGMORE_API_KEY` as a project environment variable without exposing it to the browser
 - [x] Verified TrackingMore integration with typecheck, lint, and production build
+- [x] Confirmed live shipments, tracking_events, quotes, and profiles tables; added missing notifications table
+- [x] Confirmed shipments, tracking_events, and notifications are registered in Supabase Realtime
+- [x] Added reproducible `004_realtime_notifications.sql` migration with RLS and grants
+- [x] Added Resend configuration dry-run support and verified it returns configured successfully without sending mail
+- [x] Verified SmartSupp loads in the browser and public tracking UI renders end to end
+- [x] Fixed corrupted Next.js generated validator output; typecheck, lint, and production build now pass
 
 ## Integration Notes
 
