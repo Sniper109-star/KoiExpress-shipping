@@ -32,8 +32,8 @@ export function Footer() {
         <div className="grid gap-8 md:gap-12 grid-cols-2 md:grid-cols-6">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={32} height={32} className="size-8 rounded-full object-cover" />
-              <span className="text-xl font-bold tracking-tight">KoiExpress USA - Global</span>
+              <Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics vehicle mark" width={32} height={32} className="size-8 rounded-full object-cover" />
+              <span className="text-xl font-bold tracking-tight">Unifet Logistics</span>
             </Link>
             <p className="text-white/60 text-sm max-w-xs leading-relaxed">
               End-to-end delivery management with real-time tracking. Fast, reliable, and professional.
@@ -90,7 +90,7 @@ export function Footer() {
         </div>
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-white/60">
-            &copy; {new Date().getFullYear()} KoiExpress. All rights reserved.
+            &copy; {new Date().getFullYear()} Unifet Logistics. All rights reserved.
           </p>
           <Button size="sm" className="bg-primary text-white hover:bg-primary/90 border-primary">
             Get Started

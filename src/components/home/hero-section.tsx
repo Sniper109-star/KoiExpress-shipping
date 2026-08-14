@@ -9,10 +9,10 @@ export function HeroSection() {
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col gap-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-dark">
-              Fast. Reliable. <span className="text-primary">KoiExpress.</span>
+              Move with clarity. <span className="text-primary">Unifet Logistics.</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl">
-              USA-based global shipping with real-time tracking. From pickup to doorstep, KoiExpress moves every shipment with confidence.
+              A sharper control layer for shipments, drivers, and customers. From pickup to doorstep, Unifet keeps every mile visible.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link href="/create-shipment">
