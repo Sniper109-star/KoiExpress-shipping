@@ -30,7 +30,7 @@ export type ShipmentStatus = z.infer<typeof shipmentStatusSchema>
 export type Address = z.infer<typeof addressSchema>
 export type PackageDetails = z.infer<typeof packageSchema>
 
-export const rateSchema = z.object({ provider: z.string(), carrier: z.string(), service: z.string(), amountCents: z.number().int().nonnegative(), currency: z.string().length(3), estimatedDays: z.number().int().positive() })
+export const rateSchema = z.object({ provider: z.string(), carrier: z.string(), service: z.string(), amountCents: z.number().int().nonnegative(), currency: z.string().length(3), estimatedDays: z.number().int().positive(), metadata: z.record(z.string(), z.string()).optional() })
 export type Rate = z.infer<typeof rateSchema>
 export type ShipmentDraft = { origin: Address; destination: Address; package: PackageDetails }
 export type Label = { trackingNumber: string; labelUrl: string | null; status: "label_created" | "label_pending" }
