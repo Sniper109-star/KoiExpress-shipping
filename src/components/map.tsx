@@ -58,6 +58,9 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     map.current = instance;
     instance.addControl(new maplibregl.NavigationControl(), "top-right");
     instance.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }), "top-right");
+    instance.on("styleimagemissing", (event) => {
+      if (!instance.hasImage(event.id)) instance.addImage(event.id, { width: 1, height: 1, data: new Uint8Array([0, 0, 0, 0]) });
+    });
     instance.on("error", (event) => console.error("[v0] Map rendering error", event.error));
     instance.on("load", () => {
       instance.resize();

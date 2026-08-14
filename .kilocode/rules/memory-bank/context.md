@@ -86,7 +86,7 @@
 
 ## Integration Notes
 
-Neon is the relational backend for shipment data, customers, addresses, tracking events, invoices, documents, notifications, and Better Auth sessions. Vercel Blob private storage is used for shipment labels, PDFs, and documents; private files are served through authenticated delivery routes. Dashboard live updates use Neon-backed server APIs with polling/SSE rather than Neon Realtime. MapTiler is accessed through server-side proxy routes with `MAPTILER_API_KEY`; Resend, Smartsupp, and Damoov credentials remain server-side.
+Neon is the relational backend for shipment data, customers, addresses, tracking events, invoices, documents, notifications, and Better Auth sessions. Vercel Blob private storage is used for shipment labels, PDFs, and documents; private files are served through authenticated delivery routes. Dashboard live updates use Neon-backed server APIs with SSE rather than Neon Realtime; the public landing tracker subscribes to the same stream after lookup. Tracking event history is exposed through `/api/shipments/[shipmentId]/events`, merging legacy and shipping-engine events. MapTiler is accessed through server-side proxy routes with `MAPTILER_API_KEY`; Resend, Smartsupp, and Damoov credentials remain server-side.
 
 The Neon schema was validated and created incrementally through Neon MCP, including profiles, customers, addresses, shipments, tracking_events, shipment_documents, invoices, and notifications. Compatibility columns were added to align the live tables with the existing Drizzle query layer.
 
@@ -102,7 +102,8 @@ The Neon schema was validated and created incrementally through Neon MCP, includ
 | `src/app/dashboard/` | Dashboard pages with layout wrapper |
 | `src/components/navbar.tsx` | UNIFET public navigation
 
-- [x] Rebranded active product UI, auth pages, support sender, testimonials, feature copy, navigation, metadata, and shipment entry points to UNIFET; replaced KoiExpress references and verified homepage branding in browser |
+- [x] Rebranded active product UI, auth pages, support sender, testimonials, feature copy, navigation, metadata, and shipment entry points to UNIFET; replaced KoiExpress references and verified homepage branding in browser
+- [x] Production upgrade: replaced landing tracking polling with Neon SSE, added merged tracking-events API, hardened MapTiler missing-image handling, added security headers, cancelled stale geocoding requests, and validated typecheck/lint/build/browser homepage |
 
 ## Features Implemented
 

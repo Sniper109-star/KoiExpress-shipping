@@ -13,16 +13,18 @@ export function AddressAutocomplete({ value, onChange, onSelect, placeholder }: 
     const query = value.trim()
     if (query.length < 3) { window.setTimeout(() => { setSuggestions([]); setOpen(false) }, 0); return }
     const id = ++requestId.current
+    const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/maptiler/geocoding?q=${encodeURIComponent(query)}`)
+        const response = await fetch(`/api/maptiler/geocoding?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" })
+        if (!response.ok) throw new Error("Address search unavailable")
         const data = await response.json()
         if (id !== requestId.current) return
         setSuggestions((data.features ?? []).map((feature: { id: string; place_name?: string; text?: string; center?: [number, number] }) => ({ id: feature.id, label: feature.place_name ?? feature.text ?? query, coordinates: feature.center ?? [0, 0] })))
         setOpen(true)
       } catch { setSuggestions([]) }
     }, 280)
-    return () => window.clearTimeout(timer)
+    return () => { window.clearTimeout(timer); controller.abort() }
   }, [value])
 
   return <div className="relative">

@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LiveShipmentFeed } from "./live-shipment-feed";
 import { MapLibreMap } from "@/components/map";
+import { subscribeToShipmentStream } from "@/lib/realtime";
 
 const services = [
   [Package, "Domestic Shipping", "Fast and reliable delivery of packages across cities and regions."],
@@ -56,11 +57,12 @@ export function LandingPage() {
 
   useEffect(() => {
     if (!trackedShipment?.tracking_number) return;
-    const refresh = () => fetch(`/api/track/${encodeURIComponent(trackedShipment.tracking_number)}`, { cache: "no-store" }).then((response) => response.json()).then((payload) => {
-      if (payload.shipment) setTrackedShipment(payload.shipment);
-    }).catch(() => undefined);
-    const interval = window.setInterval(refresh, 15000);
-    return () => window.clearInterval(interval);
+    const unsubscribe = subscribeToShipmentStream((event) => {
+      if (event.type !== "shipments" && event.type !== "shipment.updated") return;
+      const match = (event.data.shipments ?? []).find((shipment: { trackingNumber?: string; tracking_number?: string }) => (shipment.trackingNumber ?? shipment.tracking_number) === trackedShipment.tracking_number);
+      if (match) setTrackedShipment((current) => current ? ({ ...current, ...match, tracking_number: match.trackingNumber ?? match.tracking_number ?? current.tracking_number }) : current);
+    });
+    return unsubscribe;
   }, [trackedShipment?.tracking_number]);
 
   const estimate = useMemo(() => {
