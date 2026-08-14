@@ -1,10 +1,9 @@
 import "server-only"
-import { getShippingRates, createShippingLabel, type RateRequest } from "./karrio-client"
+import { cancelShipment, createShipment, quoteShipment, trackShipment, type ShipmentDraft, type Rate } from "../../../../packages/core/src"
+import { shippingAdapter } from "./karrio-client"
 
-export async function quoteShipment(request: RateRequest) {
-  return getShippingRates(request)
-}
-
-export async function bookShipment(input: RateRequest & { trackingNumber: string; service: string }) {
-  return createShippingLabel(input)
-}
+export const adapterCapabilities = shippingAdapter.capabilities
+export async function getShippingRates(input: ShipmentDraft) { return quoteShipment(shippingAdapter, input) }
+export async function createShippingLabel(input: ShipmentDraft & { rate: Rate; trackingNumber: string }) { return createShipment(shippingAdapter, input) }
+export async function trackWithShippingProvider(trackingNumber: string) { return trackShipment(shippingAdapter, trackingNumber) }
+export async function voidShippingLabel(trackingNumber: string) { return cancelShipment(shippingAdapter, trackingNumber) }
