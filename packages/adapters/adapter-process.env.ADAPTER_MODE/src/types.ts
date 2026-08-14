@@ -27,6 +27,7 @@ export type ShipmentInput = {
 export type Rate = {
   id: string;
   carrier: string;
+  carrierLogoUrl?: string;
   service: string;
   currency: string;
   amountCents: number;
@@ -37,5 +38,7 @@ export type ShipmentRecord = {
   id: string;
   rates: Rate[];
   labelUrl?: string | null;
+  labelDataUrl?: string | null;
   trackingCode?: string | null;
+  status?: string;
 };

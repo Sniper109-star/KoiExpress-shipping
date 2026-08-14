@@ -1,16 +1,25 @@
 import { z } from "zod"
 
 export const addressSchema = z.object({
-  city: z.string().min(1),
-  state: z.string().optional(),
-  postalCode: z.string().optional(),
-  country: z.string().min(2).max(2),
+  name: z.string().trim().optional(),
+  company: z.string().trim().optional(),
+  street1: z.string().trim().min(1),
+  street2: z.string().trim().optional(),
+  city: z.string().trim().min(1),
+  state: z.string().trim().optional(),
+  postalCode: z.string().trim().min(1),
+  country: z.string().trim().length(2).transform((value) => value.toUpperCase()),
+  phone: z.string().trim().optional().nullable(),
+  email: z.string().email().optional().nullable(),
 })
 
 export const packageSchema = z.object({
   weightKg: z.number().positive().max(5000),
   dimensions: z.string().max(120).optional(),
-  itemType: z.string().min(1).max(80),
+  lengthCm: z.number().positive().optional(),
+  widthCm: z.number().positive().optional(),
+  heightCm: z.number().positive().optional(),
+  itemType: z.string().trim().min(1).max(80),
   declaredValueCents: z.number().int().nonnegative().max(100000000),
 })
 
