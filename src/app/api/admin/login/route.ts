@@ -7,8 +7,8 @@ const schema = z.object({ email: z.string().email(), password: z.string().min(1)
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-  const adminEmail = process.env.EMAIL_2?.trim()
-  const adminPassword = process.env.PASSWORD_2
+  const adminEmail = process.env.EMAIL_3?.trim()
+  const adminPassword = process.env.PASSWORD_3
   const configured = Boolean(adminEmail && adminPassword && !adminEmail.includes("process.env") && !adminPassword.includes("process.env"))
   if (!configured) return NextResponse.json({ error: "Admin credentials are not configured" }, { status: 503 })
   if (parsed.data.email !== adminEmail || parsed.data.password !== adminPassword) {
