@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Activity, MapPin, PackageCheck } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { RefreshCw } from "lucide-react";
 
 type Shipment = {
   id: string;
@@ -31,41 +31,28 @@ export function LiveShipmentFeed() {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const { data } = await supabase
-        .from("shipments")
-        .select("id, tracking_number, destination, status, updated_at")
-        .order("updated_at", { ascending: false })
-        .limit(8);
-      if (mounted) setShipments((data ?? []) as Shipment[]);
+      try {
+        const response = await fetch("/api/shipments/live?limit=8", { cache: "no-store" });
+        if (!response.ok) throw new Error("Unable to sync shipments");
+        const result = await response.json() as { shipments?: Shipment[] };
+        if (mounted) {
+          setShipments(result.shipments ?? []);
+          setIsLive(true);
+        }
+      } catch {
+        if (mounted) setIsLive(false);
+      }
     };
     void load();
-
-    const channel = supabase
-      .channel("homepage-live-shipments")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shipments" }, (payload) => {
-        if (!mounted) return;
-        if (payload.eventType === "DELETE") {
-          setShipments((current) => current.filter((item) => item.id !== payload.old.id));
-          return;
-        }
-        const next = payload.new as Shipment;
-        setShipments((current) => [next, ...current.filter((item) => item.id !== next.id)].slice(0, 8));
-      })
-      .subscribe((status) => {
-        if (mounted) setIsLive(status === "SUBSCRIBED");
-      });
-
-    return () => {
-      mounted = false;
-      void supabase.removeChannel(channel);
-    };
+    const interval = window.setInterval(load, 15000);
+    return () => { mounted = false; window.clearInterval(interval); };
   }, []);
 
   return (
     <section aria-label="Live shipments" className="w-full max-w-sm overflow-hidden border border-primary/40 bg-card shadow-lg shadow-primary/10">
       <div className="flex items-center justify-between bg-primary px-5 py-4 text-primary-foreground">
         <div className="flex items-center gap-2 font-semibold"><Activity className="size-4" /> Live shipments</div>
-        <div className="flex items-center gap-2 text-xs font-medium"><span className={`size-2 rounded-full ${isLive ? "bg-primary-foreground" : "bg-primary-foreground/40"}`} />{isLive ? "Live" : "Connecting"}</div>
+        <div className="flex items-center gap-2 text-xs font-medium"><span className={`size-2 rounded-full ${isLive ? "bg-primary-foreground" : "bg-primary-foreground/40"}`} />{isLive ? "Live · synced" : <><RefreshCw className="size-3 animate-spin" /> Syncing…</>}</div>
       </div>
       <div className="flex max-h-72 min-h-56 flex-col overflow-y-auto bg-background">
         {shipments.length === 0 ? (
