@@ -10,7 +10,7 @@ const createSchema = z.object({
   origin: z.string().min(2).max(160),
   destination: z.string().min(2).max(160),
   status: z.string().min(1).max(40).optional(),
-  eta: z.preprocess((value) => value === "" ? null : value, z.string().datetime().nullable().optional()),
+  eta: z.preprocess((value) => value === "" ? null : value, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional()),
   driver_name: z.string().max(120).nullable().optional(),
 })
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const parsed = createSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid shipment details" }, { status: 400 })
   try {
-    const [shipment] = await db.insert(shipments).values({ trackingNumber: parsed.data.tracking_number, origin: parsed.data.origin, destination: parsed.data.destination, status: parsed.data.status ?? "pending", eta: parsed.data.eta ? new Date(parsed.data.eta) : null, driverName: parsed.data.driver_name ?? null }).returning()
+    const [shipment] = await db.insert(shipments).values({ trackingNumber: parsed.data.tracking_number, origin: parsed.data.origin, destination: parsed.data.destination, status: parsed.data.status ?? "pending", eta: parsed.data.eta ? new Date(`${parsed.data.eta}T00:00:00.000Z`) : null, driverName: parsed.data.driver_name ?? null }).returning()
     await Promise.all([
       db.insert(trackingEvents).values({ shipmentId: shipment.id, status: shipment.status, location: shipment.origin, message: "Shipment created" }),
       db.insert(auditLogs).values({ userId: admin.email, action: "shipment_created", resource: "shipment", resourceId: shipment.id, description: `Shipment ${shipment.trackingNumber} created` }),
