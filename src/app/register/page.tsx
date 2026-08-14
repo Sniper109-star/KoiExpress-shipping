@@ -9,8 +9,8 @@ export default function Register() {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
-            <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={28} height={28} className="size-7 rounded-full object-cover" />
-            <span>KoiExpress</span>
+            <Image src="/brand/unifet-vehicle-mark.png" alt="UNIFET logo" width={28} height={28} className="size-7 rounded-full object-cover" />
+            <span>UNIFET</span>
           </Link>
         </div>
       </header>
@@ -20,7 +20,7 @@ export default function Register() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold text-dark">Create your account</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Join KoiExpress and start shipping across the USA and worldwide.
+              Join UNIFET and start shipping across the USA and worldwide.
             </p>
           </div>
 

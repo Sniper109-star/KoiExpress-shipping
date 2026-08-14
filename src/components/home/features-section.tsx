@@ -25,7 +25,7 @@ export function FeaturesSection() {
     <section className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center space-y-4 mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-dark">Why Choose KoiExpress</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-dark">Why Choose UNIFET</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Built for speed, reliability, and transparency. Here is what sets us apart.
           </p>

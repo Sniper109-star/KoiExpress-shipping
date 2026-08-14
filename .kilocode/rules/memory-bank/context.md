@@ -94,13 +94,15 @@ The Neon schema was validated and created incrementally through Neon MCP, includ
 
 | Directory/File | Description |
 |----------------|-------------|
-| `src/app/globals.css` | Tailwind v4 KoiExpress theme |
+| `src/app/globals.css` | Tailwind v4 UNIFET theme |
 | `src/app/layout.tsx` | Root layout with Inter font |
 | `src/components/ui/` | Enhanced UI components (card, button, table, modal, input, label, select) |
 | `src/components/layouts/` | Sidebar, DashboardHeader, DashboardLayout |
 | `src/components/home/` | HeroSection, FeaturesSection, MapPreviewSection, TestimonialsSection, Footer, LandingPage |
 | `src/app/dashboard/` | Dashboard pages with layout wrapper |
-| `src/components/navbar.tsx` | KoiExpress public navigation |
+| `src/components/navbar.tsx` | UNIFET public navigation
+
+- [x] Rebranded active product UI, auth pages, support sender, testimonials, feature copy, navigation, metadata, and shipment entry points to UNIFET; replaced KoiExpress references and verified homepage branding in browser |
 
 ## Features Implemented
 
