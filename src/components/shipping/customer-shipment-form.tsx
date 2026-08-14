@@ -31,7 +31,7 @@ export function CustomerShipmentForm() {
     setBusy(false)
   }
   return <div className="space-y-5">
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2" aria-label="Shipment details">
       {([["origin", "Sender city"], ["destination", "Receiver city"], ["weightKg", "Weight (kg)"], ["dimensions", "Dimensions (L × W × H)"], ["description", "What are you shipping?"], ["itemType", "Package type"], ["declaredValue", "Declared value (USD)"]] as const).map(([key, label]) => <label key={key} className="space-y-2 text-sm font-medium">{label}<input value={form[key]} onChange={(event) => update(key, event.target.value)} type={key === "weightKg" || key === "declaredValue" ? "number" : "text"} className="h-12 w-full rounded-lg border border-input bg-background px-3 font-normal outline-none focus:border-primary" /></label>)}
     </div>
     <div className="flex flex-col gap-3 sm:flex-row"><Button type="button" onClick={getRates} disabled={busy} className="flex-1">{busy ? "Working…" : "Get shipping rates"}</Button><Link href="/login" className="flex items-center justify-center rounded-lg border px-5 text-sm font-semibold">Sign in</Link></div>

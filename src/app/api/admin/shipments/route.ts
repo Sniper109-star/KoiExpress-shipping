@@ -12,9 +12,9 @@ const createSchema = z.object({
   status: z.string().min(1).max(40).optional(),
   eta: z.preprocess((value) => value === "" ? null : value, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional()),
   driver_name: z.string().max(120).nullable().optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-  carrier: z.string().max(120).nullable().optional(),
-  shipping_cost: z.number().int().nonnegative().nullable().optional(),
+  customer_id: z.preprocess((value) => value === "" ? null : value, z.string().uuid().nullable().optional()),
+  carrier: z.preprocess((value) => value === "" ? null : value, z.string().max(120).nullable().optional()),
+  shipping_cost: z.preprocess((value) => value === "" ? null : Number(value), z.number().int().nonnegative().nullable().optional()),
   package_details: z.record(z.string(), z.unknown()).optional(),
 })
 
@@ -23,7 +23,7 @@ const updateSchema = z.object({
   status: z.string().min(1).max(40).optional(),
   driver_name: z.string().max(120).nullable().optional(),
   vehicle: z.string().max(120).nullable().optional(),
-  eta: z.string().datetime().nullable().optional(),
+  eta: z.preprocess((value) => value === "" ? null : value, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional()),
   last_update: z.string().max(500).nullable().optional(),
 })
 

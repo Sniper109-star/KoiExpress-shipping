@@ -9,7 +9,8 @@ export function CreateShipmentForm() {
   const [busy, setBusy] = useState(false)
   async function submit(formData: FormData) {
     setBusy(true); setMessage("")
-    const response = await fetch("/api/admin/shipments", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(Object.fromEntries(formData)) })
+    const raw = Object.fromEntries(formData)
+    const response = await fetch("/api/admin/shipments", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...raw, package_details: { source: "admin_dashboard" } }) })
     setBusy(false)
     if (!response.ok) { setMessage("Unable to create shipment. Check the details and try again."); return }
     setMessage("Shipment created."); setTimeout(() => window.location.reload(), 700)

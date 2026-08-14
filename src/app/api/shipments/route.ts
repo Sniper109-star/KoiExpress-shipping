@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Enter valid shipment details." }, { status: 400 })
   const trackingNumber = `UF${Date.now().toString(36).toUpperCase()}`
-  const [shipment] = await db.insert(shipments).values({ trackingNumber, origin: parsed.data.origin, destination: parsed.data.destination, status: parsed.data.paymentStatus === "awaiting_payment" ? "pending_payment" : "submitted", packageDetails: parsed.data.packageDetails, carrier: parsed.data.carrier, shippingCost: parsed.data.shippingCost, paymentStatus: parsed.data.paymentStatus, createdByUserId: session.user.id, createdByRole: "customer" }).returning()
+  const [shipment] = await db.insert(shipments).values({ trackingNumber, origin: parsed.data.origin, destination: parsed.data.destination, status: parsed.data.paymentStatus === "awaiting_payment" ? "pending_payment" : "submitted", packageDetails: parsed.data.packageDetails, carrier: parsed.data.carrier, shippingCost: parsed.data.shippingCost, paymentStatus: parsed.data.paymentStatus, customerId: session.user.id, createdByUserId: session.user.id, createdByRole: "customer" }).returning()
   await db.insert(trackingEvents).values({ shipmentId: shipment.id, status: shipment.status, location: shipment.origin, message: "Shipment request submitted by customer" })
   return NextResponse.json({ shipment }, { status: 201 })
 }
