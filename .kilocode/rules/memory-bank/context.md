@@ -79,6 +79,9 @@
 - [x] Verified the public homepage in the browser at desktop dark mode
 - [x] Removed public demo tracking hint and added accessible custom Smartsupp support button
 - [x] Added admin credential configuration validation; current project values contain literal `process.env` text and must be replaced with actual secret values before login can succeed
+- [x] Added Neon shipping-engine tables, Drizzle models, user-scoped rate calculation, label purchase, tracking, cancellation, and idempotent webhook routes
+- [x] Wired the customer shipment form to the Neon shipping-engine rate and label workflow with parcel validation, carrier comparison, label download, and print actions
+- [x] Verified shipping-engine typecheck, lint, production build, Neon tables, and dashboard/create browser rendering
 
 ## Integration Notes
 
