@@ -3,7 +3,6 @@
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -14,12 +13,10 @@ export default function AdminLoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setPending(true); setError("");
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    const role = data.user?.app_metadata?.role ?? data.user?.user_metadata?.role;
-    if (signInError || !data.user || role !== "admin") {
-      await supabase.auth.signOut(); setError("Use an authorized administrator account."); setPending(false); return;
+    const response = await fetch("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) });
+    if (!response.ok) {
+      setError("Invalid email or password."); setPending(false); return;
     }
-    document.cookie = "admin_session=authenticated-admin; path=/; max-age=28800; samesite=lax";
     router.push("/admin/dashboard"); router.refresh();
   }
 

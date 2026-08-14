@@ -60,6 +60,13 @@
 - [x] Added Resend configuration dry-run support and verified it returns configured successfully without sending mail
 - [x] Verified SmartSupp loads in the browser and public tracking UI renders end to end
 - [x] Fixed corrupted Next.js generated validator output; typecheck, lint, and production build now pass
+- [x] Hardened public tracking with normalized lookup, validation, shareable tracking URLs, and initial auto-load
+- [x] Added Suspense boundary for tracking search params and improved TrackingMore no-store/error responses
+- [x] Verified tracking page browser flow, TrackingMore validation responses, typecheck, lint, and production build
+- [x] Confirmed `TRACKINGMORE_API_KEY` is configured server-side
+- [x] Replaced static admin cookie with signed HttpOnly admin sessions based on `EMAIL` and `PASSWORD`
+- [x] Added protected admin shipment management PATCH API using the Supabase service role server-side
+- [x] Fixed admin login redirect loop and verified valid login, unauthorized rejection, protected API access, build, lint, and typecheck
 
 ## Integration Notes
 

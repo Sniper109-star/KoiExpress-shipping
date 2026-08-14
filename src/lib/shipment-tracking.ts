@@ -29,10 +29,12 @@ export type TrackingEvent = {
 }
 
 export async function findShipment(trackingNumber: string) {
+  const normalized = trackingNumber.trim().toUpperCase()
+  if (normalized.length < 3) return null
   const { data, error } = await supabase
     .from('shipments')
     .select('id, tracking_number, origin, destination, origin_lat, origin_lng, destination_lat, destination_lng, status, eta, driver_name, vehicle, updated_at, last_update')
-    .eq('tracking_number', trackingNumber.trim())
+    .ilike('tracking_number', normalized)
     .maybeSingle()
   if (error) throw error
   return data as TrackingShipment | null
