@@ -8,8 +8,8 @@ function localRates(input: ShipmentDraft): Rate[] {
   const international = input.origin.country !== input.destination.country
   const base = (international ? 3200 : 1400) + Math.round(input.package.weightKg * 650)
   return [
-    { provider: "mock", carrier: "Unifet Network", service: "Standard", amountCents: base, currency: "USD", estimatedDays: international ? 7 : 3 },
-    { provider: "mock", carrier: "Unifet Express", service: "Express", amountCents: Math.round(base * 1.8), currency: "USD", estimatedDays: international ? 3 : 1 },
+    { provider: "unifet", carrier: "Unifet Network", service: "Standard", amountCents: base, currency: "USD", estimatedDays: international ? 7 : 3 },
+    { provider: "unifet", carrier: "Unifet Express", service: "Express", amountCents: Math.round(base * 1.8), currency: "USD", estimatedDays: international ? 3 : 1 },
   ]
 }
 

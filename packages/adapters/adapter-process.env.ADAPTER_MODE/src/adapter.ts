@@ -5,8 +5,8 @@ export class MockAdapter {
     const weightKg = input.parcels?.[0]?.weightKg ?? 1;
     const base = Math.max(500, Math.round(weightKg * 1000));
     return [
-      { id: 'mock-std', carrier: 'MockCarrier', service: 'Standard', currency: 'USD', amountCents: base, estimatedDays: 5 },
-      { id: 'mock-exp', carrier: 'MockCarrier', service: 'Express', currency: 'USD', amountCents: base + 800, estimatedDays: 2 },
+      { id: 'unifet-std', carrier: 'Unifet Network', service: 'Standard', currency: 'USD', amountCents: base, estimatedDays: 5 },
+      { id: 'unifet-exp', carrier: 'Unifet Express', service: 'Express', currency: 'USD', amountCents: base + 800, estimatedDays: 2 },
     ];
   }
 
