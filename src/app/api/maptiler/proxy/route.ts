@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const MAPTILER_HOST = "api.maptiler.com";
 
 export async function GET(request: NextRequest) {
-  const key = process.env.APIKEY;
+  const key = process.env.key;
   const target = request.nextUrl.searchParams.get("target");
   if (!key || !target) return NextResponse.json({ error: "MapTiler is not configured" }, { status: 400 });
 

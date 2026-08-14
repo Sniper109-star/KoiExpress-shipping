@@ -7,7 +7,7 @@ const schema = z.object({ email: z.string().email(), password: z.string().min(1)
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-  if (!process.env.EMAIL || !process.env.PASSWORD || parsed.data.email !== process.env.EMAIL || parsed.data.password !== process.env.PASSWORD) {
+  if (!process.env.EMAIL_2 || !process.env.PASSWORD_2 || parsed.data.email !== process.env.EMAIL_2 || parsed.data.password !== process.env.PASSWORD_2) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
   }
   const response = NextResponse.json({ ok: true })

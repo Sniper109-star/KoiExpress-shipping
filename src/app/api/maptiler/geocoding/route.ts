@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const key = process.env.APIKEY;
+  const key = process.env.key;
   const query = request.nextUrl.searchParams.get("q")?.trim();
   if (!key || !query) return NextResponse.json({ features: [] }, { status: 400 });
   const url = new URL(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json`);
