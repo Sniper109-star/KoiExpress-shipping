@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminSession } from '@/lib/admin-session'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin')
   if (!isAdminRoute || pathname === '/admin' || pathname === '/api/admin/login') return NextResponse.next()
