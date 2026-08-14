@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { shippingEvents, shippingLabels, shippingParcels, shippingRates, shippingShipments, shippingTrackingEvents } from "@/lib/db/schema"
 import { getShippingRates, createShippingLabel, trackWithShippingProvider, voidShippingLabel } from "@/lib/services/shipping/shipping-service"
+import { scheduleShipmentTrackingRefresh } from "@/lib/qstash-workflow"
 import type { Rate, ShipmentDraft } from "../../packages/core/src"
 
 export const shippingEngineInput = z.object({
@@ -57,7 +58,8 @@ export async function purchaseEngineLabel(shipmentId: string, rateId: string) {
   await db.update(shippingShipments).set({ status: "label_purchased", carrierCode: selected.carrierCode, serviceCode: selected.serviceCode, shippingCostCents: selected.totalCents, trackingNumber, updatedAt: new Date() }).where(and(eq(shippingShipments.id, shipmentId), eq(shippingShipments.userId, userId)))
   const label = await db.insert(shippingLabels).values({ shipmentId, userId, labelId, trackingNumber, carrierCode: selected.carrierCode, serviceCode: selected.serviceCode, labelFormat: "SVG", labelUrl: result.labelUrl }).returning()
   await db.insert(shippingEvents).values({ shipmentId, userId, eventType: "shipment.label_purchased", idempotencyKey: `label:${shipmentId}:${labelId}`, payload: { trackingNumber, rateId, labelId } }).onConflictDoNothing()
-  return { shipmentId, trackingNumber, label: label[0] }
+  const workflow = await scheduleShipmentTrackingRefresh({ shipmentId, trackingNumber })
+  return { shipmentId, trackingNumber, label: label[0], workflow }
 }
 
 export async function getEngineTracking(shipmentId: string) {
