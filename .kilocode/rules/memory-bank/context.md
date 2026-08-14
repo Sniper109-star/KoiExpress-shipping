@@ -67,6 +67,9 @@
 - [x] Replaced static admin cookie with signed HttpOnly admin sessions based on `EMAIL` and `PASSWORD`
 - [x] Added protected admin shipment management PATCH API using the Supabase service role server-side
 - [x] Fixed admin login redirect loop and verified valid login, unauthorized rejection, protected API access, build, lint, and typecheck
+- [x] Added branded homepage live shipment feed backed by Supabase shipments and realtime updates
+- [x] Added company email `Vicities56@gmail.com` to the homepage footer and contact routing fallback
+- [x] Verified homepage browser rendering, Resend dry-run, typecheck, lint, and production build
 
 ## Integration Notes
 

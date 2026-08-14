@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { LiveShipmentFeed } from "./live-shipment-feed";
 
 const services = [
   [Package, "Domestic Shipping", "Fast and reliable delivery of packages across cities and regions."],
@@ -90,7 +91,7 @@ export function LandingPage() {
             <p className="mt-8 max-w-2xl text-lg leading-8 text-secondary-foreground/70 md:text-xl">USA-based global shipping and logistics designed to move your packages safely, quickly, and efficiently across every border.</p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row"><Link href="#quote"><Button size="lg" className="h-14 rounded-sm bg-primary px-7 text-primary-foreground hover:bg-primary/90">Get a Shipping Quote <ArrowRight data-icon="inline-end" /></Button></Link><Link href="#tracking"><Button size="lg" variant="outline" className="h-14 rounded-sm border-secondary-foreground/30 bg-transparent px-7 text-secondary-foreground hover:bg-secondary-foreground hover:text-secondary">Track Shipment <Search data-icon="inline-end" /></Button></Link></div>
           </div>
-          <div className="w-full max-w-sm border border-secondary-foreground/20 p-5"><div className="flex items-center justify-between border-b border-secondary-foreground/20 pb-4 text-xs uppercase tracking-[0.18em] text-secondary-foreground/60"><span>Live network</span><span className="text-primary">Online</span></div><div className="flex items-center gap-4 py-8"><div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground"><PackageCheck /></div><div><p className="text-3xl font-semibold">24/7</p><p className="text-sm text-secondary-foreground/60">visibility across every mile</p></div></div><div className="flex items-center gap-2 text-sm text-secondary-foreground/70"><MapPin className="text-primary" /> USA <ChevronRight className="size-4" /> Global</div></div>
+          <div className="flex w-full max-w-sm flex-col gap-4"><div className="w-full border border-secondary-foreground/20 p-5"><div className="flex items-center justify-between border-b border-secondary-foreground/20 pb-4 text-xs uppercase tracking-[0.18em] text-secondary-foreground/60"><span>Live network</span><span className="text-primary">Online</span></div><div className="flex items-center gap-4 py-8"><div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground"><PackageCheck /></div><div><p className="text-3xl font-semibold">24/7</p><p className="text-sm text-secondary-foreground/60">visibility across every mile</p></div></div><div className="flex items-center gap-2 text-sm text-secondary-foreground/70"><MapPin className="text-primary" /> USA <ChevronRight className="size-4" /> Global</div></div><LiveShipmentFeed /></div>
         </div>
       </section>
 
@@ -128,7 +129,7 @@ export function LandingPage() {
 
       <section className="border-t border-border bg-accent"><div className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28"><div className="max-w-3xl"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">About KoiExpress</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Moving What Matters.</h2><p className="mt-6 text-xl leading-9 text-muted-foreground">We provide reliable shipping and logistics solutions that connect people and businesses to destinations around the world.</p><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">From small packages to commercial cargo, our goal is simple: make shipping easier, safer, and more transparent.</p></div></div></section>
 
-      <footer className="bg-secondary text-secondary-foreground"><div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-8"><div className="flex items-center gap-2 font-semibold"><Warehouse className="text-primary" /> KoiExpress</div><p className="text-secondary-foreground/60">Moving what matters, everywhere.</p><Link href="/login" className="text-primary hover:underline">Sign in to dashboard</Link></div></footer>
+      <footer className="bg-secondary text-secondary-foreground"><div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-8"><div className="flex items-center gap-2 font-semibold"><Warehouse className="text-primary" /> KoiExpress</div><p className="text-secondary-foreground/60">Moving what matters, everywhere.</p><a href="mailto:Vicities56@gmail.com" className="text-primary transition-colors hover:text-primary/80">Vicities56@gmail.com</a><Link href="/login" className="text-primary hover:underline">Sign in to dashboard</Link></div></footer>
     </main>
   );
 }
