@@ -4,12 +4,16 @@ import { ArrowLeft, Download, Search } from "lucide-react"
 import { db } from "@/lib/db"
 import { shipments } from "@/lib/db/schema"
 import { CreateShipmentForm } from "@/components/admin/create-shipment-form"
+import { getAdminUser } from "@/lib/admin-auth"
+import { redirect } from "next/navigation"
 
 const statuses = ["pending", "confirmed", "processing", "picked_up", "in_transit", "arrived_at_facility", "out_for_delivery", "delivered", "delayed", "on_hold", "returned", "cancelled"]
 const label = (status: string) => status.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase())
 const tone = (status: string) => status === "delivered" ? "bg-[#123e31] text-[#8be0ba]" : ["delayed", "cancelled", "returned"].includes(status) ? "bg-[#4a1f28] text-[#ff9b9f]" : "bg-[#173653] text-[#9bc8ee]"
 
 export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string }> }) {
+  const admin = await getAdminUser()
+  if (!admin) redirect("/admin")
   const params = await searchParams
   const q = params.q?.trim() ?? ""
   const selectedStatus = params.status ?? ""

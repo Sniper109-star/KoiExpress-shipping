@@ -1,26 +1,20 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createAdminSession } from "@/lib/admin-session"
+import { createClient } from "@/lib/supabase/server"
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-  const adminEmail = process.env.EMAIL_3?.trim()
-  const adminPassword = process.env.PASSWORD_3
-  const configured = Boolean(adminEmail && adminPassword && !adminEmail.includes("process.env") && !adminPassword.includes("process.env"))
-  if (!configured) return NextResponse.json({ error: "Admin credentials are not configured" }, { status: 503 })
-  if (parsed.data.email !== adminEmail || parsed.data.password !== adminPassword) {
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password })
+  if (error || !data.user) return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle()
+  const role = profile?.role ?? data.user.app_metadata?.role
+  if (role !== "admin" && role !== "operations") {
+    await supabase.auth.signOut()
+    return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
   }
-  const response = NextResponse.json({ ok: true })
-  response.cookies.set("admin_session", await createAdminSession(parsed.data.email), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 8 * 60 * 60,
-  })
-  return response
+  return NextResponse.json({ ok: true, role })
 }
