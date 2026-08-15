@@ -1,38 +1,57 @@
-import { NextResponse } from "next/server"
-import { eq } from "drizzle-orm"
-import { z } from "zod"
-import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
-import { shipments, trackingEvents, shippingShipments, shippingEvents, shippingParcels } from "@/lib/db/schema"
-import { headers } from "next/headers"
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
 
-const schema = z.object({ origin: z.string().min(2).max(160), destination: z.string().min(2).max(160), packageDetails: z.object({ description: z.string().min(2).max(240), weightKg: z.number().positive().max(5000), dimensions: z.string().max(120).optional(), itemType: z.string().max(80), declaredValueCents: z.number().int().nonnegative().max(100000000) }), carrier: z.string().min(2).max(120), shippingCost: z.number().int().positive().max(100000000), paymentStatus: z.enum(["unpaid", "awaiting_payment", "paid"]).default("unpaid") })
+const addressSchema = z.object({
+  name: z.string().min(2).max(120),
+  line1: z.string().min(2).max(160),
+  city: z.string().min(2).max(80),
+  state: z.string().max(80).optional(),
+  postal_code: z.string().min(2).max(20),
+  country_code: z.string().length(2).default('US'),
+  phone: z.string().max(40).optional(),
+  email: z.string().email().optional(),
+})
 
-async function getSession() { return auth.api.getSession({ headers: await headers() }) }
+const schema = z.object({
+  reference_number: z.string().min(2).max(80),
+  sender: addressSchema,
+  recipient: addressSchema,
+  package: z.object({ weight_kg: z.number().positive().max(5000), length_cm: z.number().positive(), width_cm: z.number().positive(), height_cm: z.number().positive(), declared_value: z.number().nonnegative().default(0) }),
+  item: z.object({ name: z.string().min(2).max(160), quantity: z.number().int().positive().default(1), sku: z.string().max(80).optional(), unit_price: z.number().nonnegative().default(0) }),
+  idempotency_key: z.string().max(120).optional(),
+})
 
-export async function POST(request: Request) {
-  const session = await getSession()
-  if (!session?.user) return NextResponse.json({ error: "Sign in to create a shipment." }, { status: 401 })
-  const parsed = schema.safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return NextResponse.json({ error: "Enter valid shipment details." }, { status: 400 })
-  const trackingNumber = `UF${Date.now().toString(36).toUpperCase()}`
-  const [shipment] = await db.insert(shipments).values({ trackingNumber, origin: parsed.data.origin, destination: parsed.data.destination, status: parsed.data.paymentStatus === "awaiting_payment" ? "pending_payment" : "submitted", packageDetails: parsed.data.packageDetails, carrier: parsed.data.carrier, shippingCost: parsed.data.shippingCost, paymentStatus: parsed.data.paymentStatus, customerId: session.user.id, createdByUserId: session.user.id, createdByRole: "customer" }).returning()
-  await db.insert(trackingEvents).values({ shipmentId: shipment.id, status: shipment.status, location: shipment.origin, message: "Shipment request submitted by customer" })
-  try {
-    const [engineShipment] = await db.insert(shippingShipments).values({ userId: session.user.id, publicId: trackingNumber, status: shipment.status, origin: { address: shipment.origin }, destination: { address: shipment.destination }, currency: "USD", shippingCostCents: shipment.shippingCost }).onConflictDoNothing().returning()
-    if (engineShipment) {
-      await db.insert(shippingParcels).values({ shipmentId: engineShipment.id, userId: session.user.id, weight: parsed.data.packageDetails.weightKg, weightUnit: "kg", packageType: parsed.data.packageDetails.itemType, declaredValueCents: parsed.data.packageDetails.declaredValueCents, description: parsed.data.packageDetails.description })
-      await db.insert(shippingEvents).values({ shipmentId: engineShipment.id, userId: session.user.id, eventType: "shipment.created.legacy", idempotencyKey: `legacy:${shipment.id}`, payload: { legacyShipmentId: shipment.id, trackingNumber } }).onConflictDoNothing()
-    }
-  } catch (error) {
-    console.error("[v0] Legacy shipment bridge unavailable", error)
-  }
-  return NextResponse.json({ shipment }, { status: 201 })
+async function context() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { supabase, user: null, businessId: null }
+  const { data } = await supabase.from('business_members').select('business_id').eq('user_id', user.id).limit(1).maybeSingle()
+  return { supabase, user, businessId: data?.business_id ?? null }
 }
 
 export async function GET() {
-  const session = await getSession()
-  if (!session?.user) return NextResponse.json({ error: "Sign in to view shipments." }, { status: 401 })
-  const rows = await db.select().from(shipments).where(eq(shipments.createdByUserId, session.user.id))
-  return NextResponse.json({ shipments: rows })
+  const { supabase, user, businessId } = await context()
+  if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  if (!businessId) return NextResponse.json({ shipments: [] })
+  const { data, error } = await supabase.from('shipments').select('*, sender:addresses!sender_address_id(*), recipient:addresses!recipient_address_id(*), tracking_events(*)').eq('business_id', businessId).order('created_at', { ascending: false })
+  if (error) return NextResponse.json({ error: 'Unable to load shipments' }, { status: 500 })
+  return NextResponse.json({ shipments: data ?? [] })
+}
+
+export async function POST(request: Request) {
+  const { supabase, user, businessId } = await context()
+  if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  if (!businessId) return NextResponse.json({ error: 'Create or join a business before shipping.' }, { status: 409 })
+  const parsed = schema.safeParse(await request.json().catch(() => null))
+  if (!parsed.success) return NextResponse.json({ error: 'Enter valid shipment details.', issues: parsed.error.flatten() }, { status: 400 })
+  const input = parsed.data
+  const addresses = await supabase.from('addresses').insert([{ ...input.sender, business_id: businessId }, { ...input.recipient, business_id: businessId }]).select('id')
+  if (addresses.error || !addresses.data || addresses.data.length !== 2) return NextResponse.json({ error: 'Unable to save shipment addresses.' }, { status: 400 })
+  const { data: shipment, error } = await supabase.from('shipments').insert({ business_id: businessId, reference_number: input.reference_number, sender_address_id: addresses.data[0].id, recipient_address_id: addresses.data[1].id, created_by: user.id, idempotency_key: input.idempotency_key ?? crypto.randomUUID(), status: 'draft' }).select().single()
+  if (error || !shipment) return NextResponse.json({ error: error?.code === '23505' ? 'A shipment with this reference already exists.' : 'Unable to create shipment.' }, { status: 409 })
+  await supabase.from('packages').insert({ shipment_id: shipment.id, weight_kg: input.package.weight_kg, length_cm: input.package.length_cm, width_cm: input.package.width_cm, height_cm: input.package.height_cm, declared_value: input.package.declared_value })
+  await supabase.from('shipment_items').insert({ shipment_id: shipment.id, name: input.item.name, quantity: input.item.quantity, sku: input.item.sku, unit_price: input.item.unit_price })
+  await supabase.from('tracking_events').insert({ shipment_id: shipment.id, status: 'draft', description: 'Shipment created' })
+  return NextResponse.json({ shipment, next_step: 'quote' }, { status: 201 })
 }
