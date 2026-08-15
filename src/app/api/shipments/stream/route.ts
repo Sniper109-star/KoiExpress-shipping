@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { headers } from "next/headers"
-import { shipments, shippingEvents, shippingShipments } from "@/lib/db/schema"
+import { shipments, trackingEvents, shippingEvents, shippingShipments } from "@/lib/db/schema"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
@@ -26,7 +26,10 @@ export async function GET(request: Request) {
           const engineQuery = userId ? db.select({ id: shippingShipments.id, publicId: shippingShipments.publicId, trackingNumber: shippingShipments.trackingNumber, status: shippingShipments.status, origin: shippingShipments.origin, destination: shippingShipments.destination, updatedAt: shippingShipments.updatedAt }).from(shippingShipments).where(eq(shippingShipments.userId, userId)).orderBy(desc(shippingShipments.updatedAt)).limit(100) : Promise.resolve([])
           const [legacy, engine] = await Promise.all([legacyQuery, engineQuery])
           const latest = [...legacy, ...engine].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-          send("shipments", { shipments: latest, source: "neon-sse", emittedAt: new Date().toISOString() })
+          const locationRows = await db.select({ shipmentId: trackingEvents.shipmentId, latitude: trackingEvents.latitude, longitude: trackingEvents.longitude, location: trackingEvents.location, createdAt: trackingEvents.createdAt }).from(trackingEvents).orderBy(desc(trackingEvents.createdAt)).limit(100)
+          const latestLocations = new Map<string, (typeof locationRows)[number]>()
+          for (const location of locationRows) if (!latestLocations.has(location.shipmentId)) latestLocations.set(location.shipmentId, location)
+          send("shipments", { shipments: latest.map((shipment) => ({ ...shipment, liveLocation: latestLocations.get(shipment.id) ?? null })), source: "neon-sse", emittedAt: new Date().toISOString() })
           const events = userId ? await db.select().from(shippingEvents).where(eq(shippingEvents.userId, userId)).orderBy(desc(shippingEvents.createdAt)).limit(50) : []
           const freshEvents = events.filter((event) => event.createdAt > cursor)
           if (freshEvents.length) {
