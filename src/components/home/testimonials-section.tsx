@@ -42,7 +42,7 @@ export function TestimonialsSection() {
       initials: "JM",
       name: "Jane Martinez",
       role: "E-commerce Owner",
-      quote: "KoiExpress transformed our delivery operations. Real-time tracking and reliable drivers mean happy customers.",
+      quote: "UNIFET transformed our delivery operations. Real-time tracking and reliable drivers mean happy customers.",
       rating: 5,
     },
     {
@@ -67,7 +67,7 @@ export function TestimonialsSection() {
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-dark">Trusted by Thousands</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            See what our customers and partners say about their experience with KoiExpress.
+            See what our customers and partners say about their experience with UNIFET.
           </p>
         </div>
         <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3">

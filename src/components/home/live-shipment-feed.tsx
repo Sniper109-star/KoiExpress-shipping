@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Activity, MapPin, PackageCheck } from "lucide-react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react"
+import { subscribeToShipmentStream } from "@/lib/realtime";
 
 type Shipment = {
   id: string;
@@ -29,23 +30,14 @@ export function LiveShipmentFeed() {
   const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        const response = await fetch("/api/shipments/live?limit=8", { cache: "no-store" });
-        if (!response.ok) throw new Error("Unable to sync shipments");
-        const result = await response.json() as { shipments?: Shipment[] };
-        if (mounted) {
-          setShipments(result.shipments ?? []);
-          setIsLive(true);
-        }
-      } catch {
-        if (mounted) setIsLive(false);
+    const unsubscribe = subscribeToShipmentStream((event) => {
+      if (event.type === "ready") setIsLive(true)
+      if (event.type === "shipments") {
+        setShipments((event.data.shipments ?? []).slice(0, 8).map((shipment: any) => ({ id: shipment.id, tracking_number: shipment.trackingNumber ?? shipment.tracking_number ?? shipment.publicId, destination: typeof shipment.destination === "string" ? shipment.destination : shipment.destination?.city ?? "Destination pending", status: shipment.status, updated_at: shipment.updatedAt ?? shipment.updated_at })))
+        setIsLive(true)
       }
-    };
-    void load();
-    const interval = window.setInterval(load, 15000);
-    return () => { mounted = false; window.clearInterval(interval); };
+    }, () => setIsLive(false))
+    return unsubscribe
   }, []);
 
   return (

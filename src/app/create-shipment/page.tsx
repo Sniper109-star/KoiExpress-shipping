@@ -1,97 +1,12 @@
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Package } from "lucide-react";
-import { MapLibreMap } from "@/components/map";
-import { Button } from "@/components/ui/button";
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowLeft } from "lucide-react"
+import { MapLibreMap } from "@/components/map"
+import { CustomerShipmentForm } from "@/components/shipping/customer-shipment-form"
 
 export default function CreateShipmentPage() {
-  const origin: [number, number] = [-74.006, 40.7128];
-  const destination: [number, number] = [-73.9352, 40.7306];
-
-  return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border bg-background">
-        <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
-            <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={28} height={28} className="size-7 rounded-full object-cover" />
-            <span className="hidden sm:inline">KoiExpress</span>
-          </Link>
-          <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-12">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-dark">Create Shipment</h1>
-            <p className="text-muted-foreground">
-              Please sign in to create shipments. This page requires authentication.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-red-100 bg-background p-6 md:p-8 shadow-sm">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="origin" className="text-sm font-medium text-dark">
-                    Origin
-                  </label>
-                  <input
-                    id="origin"
-                    type="text"
-                    placeholder="Pickup location"
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
-                    defaultValue="New York, NY"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="destination" className="text-sm font-medium text-dark">
-                    Destination
-                  </label>
-                  <input
-                    id="destination"
-                    type="text"
-                    placeholder="Delivery location"
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
-                    defaultValue="Brooklyn, NY"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="weight" className="text-sm font-medium text-dark">
-                    Weight (kg)
-                  </label>
-                  <input
-                    id="weight"
-                    type="number"
-                    placeholder="0.0"
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
-                  />
-                </div>
-                <Button className="w-full h-12 rounded-md bg-primary text-white font-medium text-base flex items-center justify-center gap-2 hover:bg-primary/90">
-                  <Package className="h-4 w-4" />
-                  <span>Create Shipment</span>
-                </Button>
-              </div>
-            </div>
-
-            <MapLibreMap
-              origin={origin}
-              destination={destination}
-              className="h-[300px] md:h-[400px] w-full rounded-xl border border-red-100 shadow-sm"
-            />
-          </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Need an account?{" "}
-            <Link href="/login" className="font-medium text-primary underline">
-              Sign In
-            </Link>
-          </p>
-        </div>
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-background text-foreground">
+    <header className="border-b border-border"><div className="container mx-auto flex h-16 items-center gap-4 px-4"><Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary"><Image src="/brand/unifet-vehicle-mark.png" alt="Unifet Logistics" width={28} height={28} className="size-7 rounded-full object-cover" /><span>Unifet Logistics</span></Link><Link href="/" className="ml-auto flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4" />Back to Home</Link></div></header>
+    <main className="container mx-auto px-4 py-8 md:py-14"><div className="mx-auto max-w-6xl space-y-8"><div className="max-w-2xl"><p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Customer shipping</p><h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Start a shipment request.</h1><p className="mt-4 text-lg leading-8 text-muted-foreground">Tell us where your package is going, compare available options, and submit it for confirmation.</p></div><div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"><section className="rounded-xl border border-border bg-card p-5 shadow-sm md:p-8"><CustomerShipmentForm /></section><MapLibreMap origin={[-74.006, 40.7128]} destination={[-73.9352, 40.7306]} className="min-h-[360px] w-full rounded-xl border border-border shadow-sm" /></div><p className="text-sm text-muted-foreground">Already have an account? <Link href="/login" className="font-semibold text-primary underline">Sign in</Link> to see your shipment history.</p></div></main>
+  </div>
 }

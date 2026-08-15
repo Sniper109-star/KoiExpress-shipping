@@ -9,8 +9,8 @@ export default function Login() {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
-            <Image src="/brand/koi-express-logo.jpg" alt="KoiExpress logo" width={28} height={28} className="size-7 rounded-full object-cover" />
-            <span>KoiExpress</span>
+            <Image src="/brand/unifet-vehicle-mark.png" alt="UNIFET logo" width={28} height={28} className="size-7 rounded-full object-cover" />
+            <span>UNIFET</span>
           </Link>
         </div>
       </header>
@@ -20,7 +20,7 @@ export default function Login() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold text-dark">Welcome back</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Sign in to your KoiExpress account to manage USA and global shipments.
+              Sign in to your UNIFET account to manage USA and global shipments.
             </p>
           </div>
 

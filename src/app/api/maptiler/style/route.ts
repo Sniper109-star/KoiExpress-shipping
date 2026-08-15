@@ -6,7 +6,8 @@ function rewriteUrls(value: unknown): unknown {
   if (typeof value === "string" && value.startsWith(MAPTILER_BASE)) {
     const url = new URL(value);
     url.searchParams.delete("key");
-    return `/api/maptiler/proxy?target=${encodeURIComponent(url.toString())}`;
+    const target = url.toString().replaceAll("%7B", "{").replaceAll("%7D", "}");
+    return `/api/maptiler/proxy?target=${encodeURIComponent(target)}`;
   }
   if (Array.isArray(value)) return value.map(rewriteUrls);
   if (value && typeof value === "object") {
@@ -21,5 +22,8 @@ export async function GET() {
   const upstream = await fetch(`${MAPTILER_BASE}/maps/streets-v2/style.json?key=${encodeURIComponent(key)}`, { next: { revalidate: 3600 } });
   if (!upstream.ok) return NextResponse.json({ error: "MapTiler style unavailable" }, { status: upstream.status });
   const style = await upstream.json();
-  return NextResponse.json(rewriteUrls(style), { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } });
+  const rewrittenStyle = rewriteUrls(style) as Record<string, unknown>;
+  delete rewrittenStyle.sprite;
+  delete rewrittenStyle.glyphs;
+  return NextResponse.json(rewrittenStyle, { headers: { "Cache-Control": "no-store" } });
 }

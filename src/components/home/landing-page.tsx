@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiveShipmentFeed } from "./live-shipment-feed";
+import { MapLibreMap } from "@/components/map";
+import { subscribeToShipmentStream } from "@/lib/realtime";
 
 const services = [
   [Package, "Domestic Shipping", "Fast and reliable delivery of packages across cities and regions."],
@@ -55,11 +57,12 @@ export function LandingPage() {
 
   useEffect(() => {
     if (!trackedShipment?.tracking_number) return;
-    const refresh = () => fetch(`/api/track/${encodeURIComponent(trackedShipment.tracking_number)}`, { cache: "no-store" }).then((response) => response.json()).then((payload) => {
-      if (payload.shipment) setTrackedShipment(payload.shipment);
-    }).catch(() => undefined);
-    const interval = window.setInterval(refresh, 15000);
-    return () => window.clearInterval(interval);
+    const unsubscribe = subscribeToShipmentStream((event) => {
+      if (event.type !== "shipments" && event.type !== "shipment.updated") return;
+      const match = (event.data.shipments ?? []).find((shipment: { trackingNumber?: string; tracking_number?: string }) => (shipment.trackingNumber ?? shipment.tracking_number) === trackedShipment.tracking_number);
+      if (match) setTrackedShipment((current) => current ? ({ ...current, ...match, tracking_number: match.trackingNumber ?? match.tracking_number ?? current.tracking_number }) : current);
+    });
+    return unsubscribe;
   }, [trackedShipment?.tracking_number]);
 
   const estimate = useMemo(() => {
@@ -91,10 +94,10 @@ export function LandingPage() {
           <div className="max-w-3xl">
             <p className="mb-6 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/70"><span className="size-2 rounded-full bg-primary" />Unifet logistics</p>
             <h1 className="text-balance text-5xl font-semibold tracking-[-0.06em] md:text-7xl lg:text-8xl">Ship Anywhere.<br /><span className="text-primary">We Handle the Journey.</span></h1>
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-secondary-foreground/70 md:text-xl">USA-based global shipping and logistics designed to move your packages safely, quickly, and efficiently across every border.</p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row"><Link href="#quote"><Button size="lg" className="h-14 rounded-sm bg-primary px-7 text-primary-foreground hover:bg-primary/90">Get a Shipping Quote <ArrowRight data-icon="inline-end" /></Button></Link><Link href="#tracking"><Button size="lg" variant="outline" className="h-14 rounded-sm border-secondary-foreground/30 bg-transparent px-7 text-secondary-foreground hover:bg-secondary-foreground hover:text-secondary">Track Shipment <Search data-icon="inline-end" /></Button></Link></div>
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-secondary-foreground/70 md:text-xl">Compare the best rates from 40+ global carriers, print labels in seconds, and give every customer seamless tracking and returns.</p>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row"><Link href="/create-shipment"><Button size="lg" className="h-14 rounded-sm bg-primary px-7 text-primary-foreground hover:bg-primary/90">Create a Shipment <ArrowRight data-icon="inline-end" /></Button></Link><Link href="/track"><Button size="lg" variant="outline" className="h-14 rounded-sm border-secondary-foreground/30 bg-transparent px-7 text-secondary-foreground hover:bg-secondary-foreground hover:text-secondary">Track Shipment <Search data-icon="inline-end" /></Button></Link></div>
           </div>
-          <div className="flex w-full max-w-sm flex-col gap-4"><div className="w-full border border-secondary-foreground/20 p-5"><div className="flex items-center justify-between border-b border-secondary-foreground/20 pb-4 text-xs uppercase tracking-[0.18em] text-secondary-foreground/60"><span>Live network</span><span className="text-primary">Online</span></div><div className="flex items-center gap-4 py-8"><div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground"><PackageCheck /></div><div><p className="text-3xl font-semibold">24/7</p><p className="text-sm text-secondary-foreground/60">visibility across every mile</p></div></div><div className="flex items-center gap-2 text-sm text-secondary-foreground/70"><MapPin className="text-primary" /> USA <ChevronRight className="size-4" /> Global</div></div><LiveShipmentFeed /></div>
+          <div className="flex w-full max-w-sm flex-col gap-4"><div className="w-full border border-secondary-foreground/20 p-5"><div className="flex items-center justify-between border-b border-secondary-foreground/20 pb-4 text-xs uppercase tracking-[0.18em] text-secondary-foreground/60"><span>Live network</span><span className="text-primary">Online</span></div><div className="flex items-center gap-4 py-8"><div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground"><PackageCheck /></div><div><p className="text-3xl font-semibold">24/7</p><p className="text-sm text-secondary-foreground/60">visibility across every mile</p></div></div><div className="flex items-center gap-2 text-sm text-secondary-foreground/70"><MapPin className="text-primary" /> 40+ carriers <ChevronRight className="size-4" /> Global coverage</div></div><LiveShipmentFeed /></div>
         </div>
       </section>
 
@@ -122,6 +125,12 @@ export function LandingPage() {
             <Image src="/unifet-cargo-aircraft.png" alt="Unifet red cargo aircraft" width={1200} height={900} className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div className="flex items-center justify-between p-5"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Global reach</p><h3 className="mt-1 text-xl font-semibold">Air cargo</h3></div><Plane className="text-primary" /></div>
           </article>
+        </div>
+      </section>
+      <section className="border-y border-border bg-card">
+        <div className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28">
+          <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Live map</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">See the journey in motion.</h2></div><p className="max-w-sm leading-7 text-muted-foreground">Pickup, route, and delivery checkpoints in one real-time view.</p></div>
+          <div className="relative overflow-hidden border border-border bg-background"><MapLibreMap className="h-[320px] w-full md:h-[480px]" origin={[-74.006, 40.7128]} destination={[-73.935, 40.7306]} driverLocation={[-73.98, 40.72]} route={[[-74.006, 40.7128], [-73.98, 40.72], [-73.935, 40.7306]]} /><div className="pointer-events-none absolute bottom-4 left-4 border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur"><p className="text-sm font-semibold">Live shipment visibility</p><p className="text-xs text-muted-foreground">Route synced with current checkpoints.</p></div></div>
         </div>
       </section>
       <section id="tracking" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-20 md:px-8 md:py-28"><div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Shipment visibility</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Track your shipment.</h2><p className="mt-5 max-w-md leading-7 text-muted-foreground">Enter your Unifet tracking number for live status updates and the latest checkpoint.</p></div><div className="border border-border bg-card p-6 md:p-8"><div className="flex flex-col gap-3 sm:flex-row"><input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Enter tracking number" className="h-14 flex-1 border border-input bg-background px-4 outline-none focus:border-primary" /><Button onClick={trackShipment} className="h-14 rounded-sm px-6">Track Package <Search data-icon="inline-end" /></Button></div>{trackedShipment ? <div className="mt-8"><div className="flex items-center justify-between border-b border-border pb-4"><div><p className="font-semibold">{trackedShipment.tracking_number}</p><p className="text-sm text-muted-foreground">{trackedShipment.origin} to {trackedShipment.destination}</p></div><span className="bg-accent px-3 py-1 text-sm font-semibold capitalize text-primary">{trackedShipment.status.replaceAll("_", " ")}</span></div><div className="mt-8 grid grid-cols-4 gap-2">{["picked_up", "in_transit", "at_destination", "delivered"].map((status) => <div key={status} className="flex flex-col gap-2"><div className={`h-2 ${["picked_up", "in_transit", "at_destination", "delivered"].indexOf(trackedShipment.status) >= ["picked_up", "in_transit", "at_destination", "delivered"].indexOf(status) ? "bg-primary" : "bg-muted"}`} /><span className="text-xs capitalize text-muted-foreground">{status.replaceAll("_", " ")}</span></div>)}</div></div> : <p className="mt-6 text-sm text-muted-foreground">Live tracking updates appear here after you enter a valid shipment number.</p>}</div></div></section>

@@ -79,10 +79,14 @@
 - [x] Verified the public homepage in the browser at desktop dark mode
 - [x] Removed public demo tracking hint and added accessible custom Smartsupp support button
 - [x] Added admin credential configuration validation; current project values contain literal `process.env` text and must be replaced with actual secret values before login can succeed
+- [x] Added Neon shipping-engine tables, Drizzle models, user-scoped rate calculation, label purchase, tracking, cancellation, and idempotent webhook routes
+- [x] Wired the customer shipment form to the Neon shipping-engine rate and label workflow with parcel validation, carrier comparison, label download, and print actions
+- [x] Verified shipping-engine typecheck, lint, production build, Neon tables, and dashboard/create browser rendering
+- [x] Added MapTiler address autocomplete with server-side geocoding, shipment coordinate capture, live landing-page route map, and browser-verified map frontend integration
 
 ## Integration Notes
 
-Neon is the relational backend for shipment data, customers, addresses, tracking events, invoices, documents, notifications, and Better Auth sessions. Vercel Blob private storage is used for shipment labels, PDFs, and documents; private files are served through authenticated delivery routes. Dashboard live updates use Neon-backed server APIs with polling/SSE rather than Neon Realtime. MapTiler is accessed through server-side proxy routes with `MAPTILER_API_KEY`; Resend, Smartsupp, and Damoov credentials remain server-side.
+Neon is the relational backend for shipment data, customers, addresses, tracking events, invoices, documents, notifications, and Better Auth sessions. Vercel Blob private storage is used for shipment labels, PDFs, and documents; private files are served through authenticated delivery routes. Dashboard live updates use Neon-backed server APIs with SSE rather than Neon Realtime; the public landing tracker subscribes to the same stream after lookup. Tracking event history is exposed through `/api/shipments/[shipmentId]/events`, merging legacy and shipping-engine events. MapTiler is accessed through server-side proxy routes with `MAPTILER_API_KEY`; Resend, Smartsupp, and Damoov credentials remain server-side.
 
 The Neon schema was validated and created incrementally through Neon MCP, including profiles, customers, addresses, shipments, tracking_events, shipment_documents, invoices, and notifications. Compatibility columns were added to align the live tables with the existing Drizzle query layer.
 
@@ -90,13 +94,16 @@ The Neon schema was validated and created incrementally through Neon MCP, includ
 
 | Directory/File | Description |
 |----------------|-------------|
-| `src/app/globals.css` | Tailwind v4 KoiExpress theme |
+| `src/app/globals.css` | Tailwind v4 UNIFET theme |
 | `src/app/layout.tsx` | Root layout with Inter font |
 | `src/components/ui/` | Enhanced UI components (card, button, table, modal, input, label, select) |
 | `src/components/layouts/` | Sidebar, DashboardHeader, DashboardLayout |
 | `src/components/home/` | HeroSection, FeaturesSection, MapPreviewSection, TestimonialsSection, Footer, LandingPage |
 | `src/app/dashboard/` | Dashboard pages with layout wrapper |
-| `src/components/navbar.tsx` | KoiExpress public navigation |
+| `src/components/navbar.tsx` | UNIFET public navigation
+
+- [x] Rebranded active product UI, auth pages, support sender, testimonials, feature copy, navigation, metadata, and shipment entry points to UNIFET; replaced KoiExpress references and verified homepage branding in browser
+- [x] Production upgrade: replaced landing tracking polling with Neon SSE, added merged tracking-events API, hardened MapTiler missing-image handling, added security headers, cancelled stale geocoding requests, and validated typecheck/lint/build/browser homepage |
 
 ## Features Implemented
 

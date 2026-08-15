@@ -15,7 +15,7 @@ export const auth = betterAuth({
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
-        : process.env.V0_DEV_APP_URL ?? process.env.V0_RUNTIME_URL),
+        : process.env.V0_DEV_APP_URL ?? process.env.V0_RUNTIME_URL ?? "http://localhost:3000"),
   advanced: {
     defaultCookieAttributes: process.env.NODE_ENV === "development" ? { sameSite: "none", secure: true } : undefined,
   },
@@ -25,5 +25,6 @@ export const auth = betterAuth({
     process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`,
     process.env.V0_DEV_APP_URL,
     process.env.V0_RUNTIME_URL,
+    "http://localhost:3000",
   ].filter(Boolean) as string[],
 })

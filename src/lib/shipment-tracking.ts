@@ -62,10 +62,15 @@ export async function findShipment(trackingNumber: string) {
 }
 
 export async function getTrackingEvents(shipmentId: string) {
-  return [] as TrackingEvent[]
+  const response = await fetch(`/api/shipments/${encodeURIComponent(shipmentId)}/events`, { cache: "no-store" })
+  if (!response.ok) throw new Error("Unable to load tracking events")
+  const result = await response.json() as { events?: Record<string, unknown>[] }
+  return (result.events ?? []).map(toEvent)
 }
 
 export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
-  const interval = window.setInterval(onChange, 15000)
-  return () => window.clearInterval(interval)
+  const source = new EventSource("/api/shipments/stream")
+  source.addEventListener("shipment.updated", onChange)
+  source.addEventListener("shipments", onChange)
+  return () => source.close()
 }

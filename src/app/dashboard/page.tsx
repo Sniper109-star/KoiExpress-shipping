@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const loadShipments = useCallback(async () => {
-    const response = await fetch("/api/shipments/live", { cache: "no-store" });
+    const response = await fetch("/api/shipments", { cache: "no-store" });
     const payload = await response.json();
     setShipments((payload.shipments ?? []) as Shipment[]);
     setLoading(false);
