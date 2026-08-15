@@ -32,9 +32,16 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 - Browser verification passed for `/dashboard/create` at 411x576 dark mode; form renders with accessible labels and carrier quote entry point.
 - Existing Better Auth emits default-secret warnings during static generation because legacy routes still import it; this is the remaining migration gap.
 
+## Recent carrier adapter work
+
+- Added `src/lib/shipping/` as Unifet-owned carrier boundary: normalized types/schemas, `CarrierAdapter`, rate/label/tracking services, and a clearly marked `CustomMockCarrier`.
+- Added `/api/shipping/rates`, `/api/shipping/labels`, and normalized `/api/tracking/[trackingNumber]` routes. Existing `/api/shipments/rates` now routes through the same Unifet rate service.
+- Karrio-compatible code remains an optional carrier implementation reference behind the service boundary; Supabase data models remain Unifet-owned.
+
 ## Next implementation priorities
 
 1. Migrate remaining auth/admin routes and login/register pages to Supabase Auth and remove Better Auth runtime dependency.
 2. Connect shipment detail/list screens to the new Supabase lifecycle and document endpoints.
-3. Add API/E2E tests for authenticated shipment creation through delivery/refund and RLS isolation.
-4. Run Supabase advisors/security checks after final policy refinements.
+3. Persist new adapter label/tracking results into Supabase shipment tables from the lifecycle endpoints.
+4. Add API/E2E tests for authenticated shipment creation through delivery/refund and RLS isolation.
+5. Run Supabase advisors/security checks after final policy refinements.
