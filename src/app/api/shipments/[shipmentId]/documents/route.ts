@@ -30,6 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ ship
   const title = parsed.data.type.replaceAll('_', ' ').toUpperCase()
   const lines = [`Reference: ${shipment.reference_number}`, `Tracking: ${shipment.tracking_number ?? 'Pending'}`, `Carrier: ${shipment.carrier_name ?? 'Unassigned'}`, `Service: ${shipment.service_name ?? 'Unassigned'}`, `Status: ${shipment.status}`, `Sender: ${shipment.sender?.name ?? ''}, ${shipment.sender?.line1 ?? ''}, ${shipment.sender?.city ?? ''}`, `Recipient: ${shipment.recipient?.name ?? ''}, ${shipment.recipient?.line1 ?? ''}, ${shipment.recipient?.city ?? ''}`, `Items: ${(shipment.shipment_items ?? []).map((item: { name: string; quantity: number }) => `${item.name} x${item.quantity}`).join(', ') || 'No items listed'}`, `Generated: ${new Date().toISOString()}`]
   const body = pdf(title, lines)
+  const printMode = new URL(request.url).searchParams.get('print') === '1'
   await supabase.from('shipment_documents').upsert({ business_id: shipment.business_id, shipment_id: shipment.id, type: parsed.data.type, file_name: `${shipment.reference_number}-${parsed.data.type}.pdf`, mime_type: 'application/pdf', metadata: { generated: true } }, { onConflict: 'shipment_id,package_id,type' })
-  return new Response(body, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${shipment.reference_number}-${parsed.data.type}.pdf"`, 'Cache-Control': 'no-store' } })
+  return new Response(body, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${printMode ? 'inline' : 'attachment'}; filename="${shipment.reference_number}-${parsed.data.type}.pdf"`, 'Cache-Control': 'no-store' } })
 }
