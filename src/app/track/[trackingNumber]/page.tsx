@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation"
+import TrackPage from "@/app/track/page"
 
 export default async function TrackingNumberPage({ params }: { params: Promise<{ trackingNumber: string }> }) {
   const { trackingNumber } = await params
-  redirect(`/track?tracking=${encodeURIComponent(trackingNumber)}`)
+  return <TrackPage initialTrackingNumber={trackingNumber} />
 }

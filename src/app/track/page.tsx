@@ -9,9 +9,9 @@ import { MapLibreMap } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { findShipment, getTrackingStages, subscribeToShipment, TrackingEvent, TrackingShipment } from "@/lib/shipment-tracking";
 
-function TrackPageContent() {
+function TrackPageContent({ initialTrackingNumber = "" }: { initialTrackingNumber?: string }) {
   const searchParams = useSearchParams();
-  const [trackingNumber, setTrackingNumber] = useState(() => searchParams.get("tracking") ?? searchParams.get("tracking_number") ?? "");
+  const [trackingNumber, setTrackingNumber] = useState(() => initialTrackingNumber || searchParams.get("tracking") || searchParams.get("tracking_number") || "");
   const [shipment, setShipment] = useState<TrackingShipment | null>(null);
   const [events, setEvents] = useState<TrackingEvent[]>([]);
   const [error, setError] = useState("");
@@ -40,7 +40,7 @@ function TrackPageContent() {
   const shipmentTrackingNumber = shipment?.tracking_number;
 
   useEffect(() => {
-    const initialTracking = searchParams.get("tracking") ?? searchParams.get("tracking_number");
+    const initialTracking = initialTrackingNumber || searchParams.get("tracking") || searchParams.get("tracking_number");
     const timer = window.setTimeout(() => {
       if (initialTracking?.trim()) void loadShipment();
     }, 0);
@@ -81,6 +81,6 @@ function TrackPageContent() {
   </div>;
 }
 
-export default function TrackPage() {
-  return <Suspense fallback={<main className="min-h-screen bg-background p-4 sm:p-8"><div className="mx-auto flex max-w-5xl flex-col gap-5"><div className="h-4 w-40 animate-pulse rounded bg-primary/20" /><div className="h-12 w-3/4 animate-pulse rounded bg-card" /><div className="h-16 animate-pulse rounded-xl border bg-card" /><div className="h-[min(62vw,420px)] min-h-[280px] animate-pulse rounded-xl border bg-card" /></div></main>}><TrackPageContent /></Suspense>;
+export default function TrackPage({ initialTrackingNumber = "" }: { initialTrackingNumber?: string }) {
+  return <Suspense fallback={<main className="min-h-screen bg-background p-4 sm:p-8"><div className="mx-auto flex max-w-5xl flex-col gap-5"><div className="h-4 w-40 animate-pulse rounded bg-primary/20" /><div className="h-12 w-3/4 animate-pulse rounded bg-card" /><div className="h-16 animate-pulse rounded-xl border bg-card" /><div className="h-[min(62vw,420px)] min-h-[280px] animate-pulse rounded-xl border bg-card" /></div></main>}><TrackPageContent initialTrackingNumber={initialTrackingNumber} /></Suspense>;
 }
