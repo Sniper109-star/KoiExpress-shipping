@@ -34,7 +34,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/maplibre-gl": "^1.14.0",
     "@types/node": "^26.0.1",
     "@types/pg": "^8.21.0",
