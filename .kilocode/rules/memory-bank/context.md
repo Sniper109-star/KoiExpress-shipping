@@ -63,3 +63,9 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 - Verification after changes: `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass. Supabase Authentication is now the client auth provider; the legacy Better Auth endpoint returns a migration response and no longer initializes Better Auth or requires `BETTER_AUTH_SECRET`.
 - Carrier layer: `carrier.ts` is the Unifet contract, `carrier-registry.ts` selects adapters, and `CustomMockCarrier` provides deterministic, clearly test-labeled rates, labels, and tracking without Karrio runtime/database dependencies.
 - API boundary: `/api/shipping/rates`, `/api/shipping/labels`, and `/api/tracking/[trackingNumber]` remain Unifet-owned and persist results to Supabase; Karrio is used only as an architectural reference.
+
+## Stream and duplicate-route cleanup
+
+- Root cause of the `validationLevel` runtime error was the legacy Drizzle/Better Auth implementation of `/api/shipments/stream`; it now uses Supabase auth, business membership, shipment polling, and tracking events exclusively.
+- `/api/shipping/rates` and `/api/tracking/[trackingNumber]` are canonical. The older `/api/shipments/rates` and `/api/track/[trackingNumber]` paths are compatibility redirects only, with callers updated to canonical routes.
+- Consolidated client SSE subscriptions through `src/lib/realtime.ts`, fixed effect/purity lint failures, and excluded stale `.next/dev` types from TypeScript input. `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass; browser verification of the home page passed at 411x630 dark mode.

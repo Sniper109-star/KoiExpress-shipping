@@ -18,7 +18,7 @@ export function CustomerShipmentForm() {
   const [sender, setSender] = useState({ ...emptyAddress })
   const [recipient, setRecipient] = useState({ ...emptyAddress })
   const [parcel, setParcel] = useState({ ...emptyParcel })
-  const [reference, setReference] = useState(`UN-${Date.now().toString(36).toUpperCase()}`)
+  const [reference, setReference] = useState(() => `UN-${Date.now().toString(36).toUpperCase()}`)
   const [shipmentId, setShipmentId] = useState<string | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
