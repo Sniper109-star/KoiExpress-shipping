@@ -10,7 +10,12 @@ export async function GET(request: NextRequest) {
   url.searchParams.set("points", `${origin};${destination}`);
   url.searchParams.set("type", "geojson");
   const response = await fetch(url, { next: { revalidate: 3600 } });
-  if (!response.ok) return NextResponse.json({ error: "Directions unavailable" }, { status: response.status });
+  if (!response.ok) {
+    return NextResponse.json(
+      { coordinates: [], fallback: true, message: "Directions provider unavailable; use the direct route fallback." },
+      { status: 200, headers: { "Cache-Control": "no-store" } },
+    );
+  }
   const payload = await response.json();
   return NextResponse.json(payload, { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } });
 }

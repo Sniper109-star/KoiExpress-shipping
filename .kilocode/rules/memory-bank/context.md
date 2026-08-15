@@ -106,6 +106,7 @@ The Neon schema was validated and created incrementally through Neon MCP, includ
 - [x] Production upgrade: replaced landing tracking polling with Neon SSE, added merged tracking-events API, hardened MapTiler missing-image handling, added security headers, cancelled stale geocoding requests, and validated typecheck/lint/build/browser homepage
 - [x] Connected MapTiler live preview to Neon shipment coordinates and SSE updates; added `/api/driver/location` for authenticated GPS event ingestion and exposed latest tracking event coordinates in live shipment responses
 - [x] Added Neon Traccar tables (`traccar_devices`, `traccar_positions`, `traccar_tracking_links`), server-only Traccar REST sync using `API_2`/`API_KEY`, authenticated `/api/traccar/live`, and a live fleet panel on the authenticated dashboard
+- [x] Platform upgrade: fixed MapTiler directions failures to return safe direct-route fallback data, added resilient live-map update timing, hardened dashboard shipment loading with retry and empty states, and verified homepage browser flow plus typecheck/lint/build
 
 ## Features Implemented
 

@@ -19,12 +19,21 @@ function getStatusBadge(status: string) {
 export default function DashboardPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadShipments = useCallback(async () => {
-    const response = await fetch("/api/shipments", { cache: "no-store" });
-    const payload = await response.json();
-    setShipments((payload.shipments ?? []) as Shipment[]);
-    setLoading(false);
+    setLoading(true);
+    try {
+      const response = await fetch("/api/shipments", { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Unable to load shipments");
+      setShipments((payload.shipments ?? []) as Shipment[]);
+      setLoadError(null);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Unable to load shipments");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -43,5 +52,5 @@ export default function DashboardPage() {
     { label: "Delivered", value: shipments.filter((shipment) => shipment.status === "delivered").length.toLocaleString(), icon: MapPin, color: "text-success" },
   ], [shipments]);
 
-  return <DashboardLayout><div className="space-y-6"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><div className="flex items-center gap-2"><h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard</h1><span className="inline-flex items-center gap-1 text-xs text-success"><Radio className="size-3" /> Live</span></div><p className="text-muted-foreground text-sm md:text-base">Live shipment operations across USA and global routes.</p></div><Link href="/dashboard/create"><Button className="gap-2"><Plus className="h-4 w-4" />New Shipment</Button></Link></div><div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">{stats.map((stat) => <Card key={stat.label} variant="default" className="p-4 md:p-6"><div className="flex items-center gap-3 md:gap-4"><div className={`flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary/10 ${stat.color}`}><stat.icon className="h-5 w-5 md:h-6 md:w-6" /></div><div><p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p><p className="text-xl md:text-2xl font-bold">{loading ? "—" : stat.value}</p></div></div></Card>)}</div><Card variant="default" className="p-4 md:p-6"><div className="flex items-center justify-between mb-4"><h2 className="text-lg font-semibold text-dark">Recent Shipments</h2><Link href="/dashboard/shipments"><Button variant="ghost" size="sm">View All</Button></Link></div><div className="space-y-2">{loading ? <p className="py-8 text-center text-muted-foreground">Loading live data...</p> : shipments.slice(0, 5).map((shipment) => <div key={shipment.id} className="flex items-center justify-between gap-4 rounded-lg border p-3"><div><p className="font-medium">{shipment.tracking_number}</p><p className="text-sm text-muted-foreground">{shipment.origin} → {shipment.destination}</p></div><div className="flex items-center gap-3">{getStatusBadge(shipment.status)}<Link href={`/dashboard/tracking?id=${shipment.tracking_number}`}><Button variant="ghost" size="sm">View</Button></Link></div></div>)}</div></Card><TraccarLivePanel /></div></DashboardLayout>;
+  return <DashboardLayout><div className="space-y-6"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><div className="flex items-center gap-2"><h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard</h1><span className="inline-flex items-center gap-1 text-xs text-success"><Radio className="size-3" /> Live</span></div><p className="text-muted-foreground text-sm md:text-base">Live shipment operations across USA and global routes.</p></div><Link href="/dashboard/create"><Button className="gap-2"><Plus className="h-4 w-4" />New Shipment</Button></Link></div><div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">{stats.map((stat) => <Card key={stat.label} variant="default" className="p-4 md:p-6"><div className="flex items-center gap-3 md:gap-4"><div className={`flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary/10 ${stat.color}`}><stat.icon className="h-5 w-5 md:h-6 md:w-6" /></div><div><p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p><p className="text-xl md:text-2xl font-bold">{loading ? "—" : stat.value}</p></div></div></Card>)}</div><Card variant="default" className="p-4 md:p-6"><div className="flex items-center justify-between mb-4"><h2 className="text-lg font-semibold text-dark">Recent Shipments</h2><Link href="/dashboard/shipments"><Button variant="ghost" size="sm">View All</Button></Link></div><div className="space-y-2">{loadError ? <div className="flex items-center justify-between gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4"><p className="text-sm text-muted-foreground">{loadError}</p><Button variant="outline" size="sm" onClick={() => void loadShipments()}>Retry</Button></div> : loading ? <p className="py-8 text-center text-muted-foreground">Loading live data...</p> : shipments.length === 0 ? <div className="rounded-lg border border-dashed p-8 text-center"><p className="font-medium">No shipments yet</p><p className="mt-1 text-sm text-muted-foreground">Create your first shipment to start tracking operations.</p><Link href="/dashboard/create"><Button className="mt-4" size="sm">Create shipment</Button></Link></div> : shipments.slice(0, 5).map((shipment) => <div key={shipment.id} className="flex items-center justify-between gap-4 rounded-lg border p-3"><div><p className="font-medium">{shipment.tracking_number}</p><p className="text-sm text-muted-foreground">{shipment.origin} → {shipment.destination}</p></div><div className="flex items-center gap-3">{getStatusBadge(shipment.status)}<Link href={`/dashboard/tracking?id=${shipment.tracking_number}`}><Button variant="ghost" size="sm">View</Button></Link></div></div>)}</div></Card><TraccarLivePanel /></div></DashboardLayout>;
 }

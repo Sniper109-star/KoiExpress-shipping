@@ -34,9 +34,10 @@ export function MapPreviewSection() {
   useEffect(() => {
     let active = true;
     const apply = (rows: LiveShipment[]) => { if (active && rows[0]) { setShipment(rows[0]); setMinutesAgo(0); } };
+    const clock = window.setInterval(() => setMinutesAgo((value) => value + 1), 60000);
     fetch("/api/shipments/live?limit=1", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((payload) => apply(payload?.shipments ?? [])).catch(() => undefined);
     const unsubscribe = subscribeToShipmentStream((event) => { if (event.type === "shipments") apply(event.data.shipments ?? []); });
-    return () => { active = false; unsubscribe(); };
+    return () => { active = false; window.clearInterval(clock); unsubscribe(); };
   }, []);
 
   const origin = useMemo<[number, number]>(() => shipment?.origin_lng != null && shipment.origin_lat != null ? [shipment.origin_lng, shipment.origin_lat] : fallbackOrigin, [shipment]);
