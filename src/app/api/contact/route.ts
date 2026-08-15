@@ -12,15 +12,15 @@ const schema = z.object({
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Please check your submission." }, { status: 400 });
-  const apiKey = process.env.API;
-  if (!apiKey) return NextResponse.json({ error: "Email service is not configured." }, { status: 503 });
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return NextResponse.json({ error: "Admin notification service is not configured." }, { status: 503 });
   if (request.headers.get("x-resend-dry-run") === "true") {
     return NextResponse.json({ ok: true, dryRun: true, configured: true });
   }
   const resend = new Resend(apiKey);
   const { name, email, subject, message } = parsed.data;
   const result = await resend.emails.send({
-    from: "UNIFET Support <onboarding@resend.dev>",
+    from: process.env.RESEND_FROM_EMAIL ?? "UNIFET Support <onboarding@resend.dev>",
     to: [process.env.SUPPORT_EMAIL ?? "Vicities56@gmail.com"],
     replyTo: email,
     subject: `[Support] ${subject}`,
