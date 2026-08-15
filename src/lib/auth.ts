@@ -2,13 +2,15 @@ import { betterAuth } from "better-auth"
 import { Pool } from "pg"
 
 const globalForAuth = globalThis as unknown as { authPool?: Pool }
-const authPool = globalForAuth.authPool ?? new Pool({ connectionString: process.env.DATABASE_URL, max: 10 })
+const authPool =
+  globalForAuth.authPool ??
+  new Pool({ connectionString: process.env.DATABASE_URL ?? process.env.POSTGRES_URL, max: 10 })
 if (process.env.NODE_ENV !== "production") globalForAuth.authPool = authPool
 
 export const auth = betterAuth({
   database: authPool,
   emailAndPassword: { enabled: true },
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET ?? process.env.SUPABASE_JWT_SECRET,
   baseURL:
     process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL

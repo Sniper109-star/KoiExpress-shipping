@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -38,6 +38,7 @@ function popupContent(title: string, detail?: string) {
 export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", origin, destination, driverLocation, route = [], markers = [], interactive = true, branded = false }: MapLibreMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
+  const [mapError, setMapError] = useState(false);
   const routeKey = JSON.stringify({ origin, destination, driverLocation, route, markers, interactive, branded });
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     instance.on("styleimagemissing", (event) => {
       if (!instance.hasImage(event.id)) instance.addImage(event.id, { width: 1, height: 1, data: new Uint8Array([0, 0, 0, 0]) });
     });
-    instance.on("error", (event) => console.error("[v0] Map rendering error", event.error));
+    instance.on("error", () => setMapError(true));
     instance.on("load", () => {
       instance.resize();
       const line = mapRoute.length > 1 ? mapRoute : mapOrigin && mapDestination ? [mapOrigin, mapDestination] : [];
@@ -86,5 +87,16 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     return () => { instance.remove(); map.current = null; };
   }, [routeKey]);
 
-  return <div ref={mapContainer} className={className} role="img" aria-label="MapTiler shipment route map" />;
+  return (
+    <div ref={mapContainer} className={`${className} relative overflow-hidden`} role="img" aria-label="Shipment route map">
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-card/95 p-6 text-center">
+          <div className="max-w-xs">
+            <p className="font-mono text-sm font-semibold text-foreground">Route map unavailable</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">Shipment details and tracking remain available while map services reconnect.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

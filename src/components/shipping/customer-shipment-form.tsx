@@ -1,76 +1,58 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowRight, Check, Plus, Trash2 } from "lucide-react"
+import { ArrowRight, Check, Download, Loader2, Printer, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AddressAutocomplete } from "@/components/shipping/address-autocomplete"
 
-type Address = { name: string; street1: string; city: string; state: string; postalCode: string; country: string }
-type Parcel = { weightKg: string; lengthCm: string; widthCm: string; heightCm: string; itemType: string }
-type Rate = { id: string; carrier: string; carrierLogoUrl?: string; service: string; serviceCode?: string; amountCents: number; totalCents?: number; currency: string; estimatedDays: number }
+type Address = { name: string; line1: string; city: string; state: string; postal_code: string; country_code: string }
+type Parcel = { weight_kg: string; length_cm: string; width_cm: string; height_cm: string; package_type: string }
+type Rate = { id: string; carrier_name: string; service_name: string; service_code: string; amount: number; currency: string; estimated_days: number }
+type Label = { trackingNumber: string; labelUrl: string | null; carrier: string; service: string; isTest: boolean }
 
-type EngineShipment = { id: string; publicId: string; trackingNumber?: string | null }
-
-const emptyAddress = { name: "", street1: "", city: "", state: "", postalCode: "", country: "US" }
-const emptyParcel = { weightKg: "", lengthCm: "", widthCm: "", heightCm: "", itemType: "Parcel" }
+const emptyAddress: Address = { name: "", line1: "", city: "", state: "", postal_code: "", country_code: "US" }
+const emptyParcel: Parcel = { weight_kg: "", length_cm: "", width_cm: "", height_cm: "", package_type: "parcel" }
 
 export function CustomerShipmentForm() {
-  const [from, setFrom] = useState<Address>({ ...emptyAddress })
-  const [to, setTo] = useState<Address>({ ...emptyAddress })
-  const [originCoordinates, setOriginCoordinates] = useState<[number, number] | undefined>()
-  const [destinationCoordinates, setDestinationCoordinates] = useState<[number, number] | undefined>()
-  const [parcels, setParcels] = useState<Parcel[]>([{ ...emptyParcel }])
-  const [declaredValue, setDeclaredValue] = useState("")
+  const [sender, setSender] = useState({ ...emptyAddress })
+  const [recipient, setRecipient] = useState({ ...emptyAddress })
+  const [parcel, setParcel] = useState({ ...emptyParcel })
+  const [reference, setReference] = useState(`UN-${Date.now().toString(36).toUpperCase()}`)
+  const [shipmentId, setShipmentId] = useState<string | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
-  const [selected, setSelected] = useState(0)
-  const [message, setMessage] = useState("")
+  const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
+  const [label, setLabel] = useState<Label | null>(null)
+  const [step, setStep] = useState(1)
   const [busy, setBusy] = useState(false)
-  const [engineShipment, setEngineShipment] = useState<EngineShipment | null>(null)
-  const [labelUrl, setLabelUrl] = useState<string | null>(null)
-  const updateAddress = (side: "from" | "to", key: keyof Address, value: string) => (side === "from" ? setFrom((current) => ({ ...current, [key]: value })) : setTo((current) => ({ ...current, [key]: value })))
-  const updateParcel = (index: number, key: keyof Parcel, value: string) => setParcels((current) => current.map((parcel, parcelIndex) => parcelIndex === index ? { ...parcel, [key]: value } : parcel))
-  const validate = () => { if (!from.street1 || !from.city || !from.postalCode || !to.street1 || !to.city || !to.postalCode) return "Add complete sender and receiver addresses."; if (parcels.some((parcel) => !Number(parcel.weightKg) || Number(parcel.weightKg) <= 0)) return "Enter a weight for every parcel."; return "" }
-  async function getRates() {
-    const error = validate(); if (error) return setMessage(error)
-    setBusy(true); setMessage("")
-    const response = await fetch("/api/shipping-engine/rates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        origin: { ...from, coordinates: originCoordinates },
-        destination: { ...to, coordinates: destinationCoordinates },
-        parcels: parcels.map((parcel) => ({
-          weight: Number(parcel.weightKg),
-          weightUnit: "kg",
-          length: Number(parcel.lengthCm) || undefined,
-          width: Number(parcel.widthCm) || undefined,
-          height: Number(parcel.heightCm) || undefined,
-          dimensionUnit: "cm",
-          packageType: parcel.itemType,
-          declaredValueCents: Math.round(Number(declaredValue || 0) * 100),
-        })),
-      }),
-    })
-    const payload = await response.json(); setBusy(false)
-    if (!response.ok) setMessage(payload.error ?? "Unable to get rates"); else { setEngineShipment(payload.shipment); setRates((payload.rates ?? []).map((rate: Rate & { carrierName?: string; serviceName?: string }) => ({ ...rate, carrier: rate.carrierName ?? rate.carrier, service: rate.serviceName ?? rate.service, amountCents: rate.totalCents ?? rate.amountCents }))); setSelected(0); setMessage(`${payload.rates?.length ?? 0} carrier options found.`) }
+  const [message, setMessage] = useState("")
+
+  const update = (side: "sender" | "recipient", key: keyof Address, value: string) => side === "sender" ? setSender((current) => ({ ...current, [key]: value })) : setRecipient((current) => ({ ...current, [key]: value }))
+  const valid = () => {
+    if (!reference.trim() || !sender.name || !sender.line1 || !sender.city || !sender.postal_code || !recipient.name || !recipient.line1 || !recipient.city || !recipient.postal_code) return "Complete both addresses and add a shipment reference."
+    if (!Number(parcel.weight_kg) || !Number(parcel.length_cm) || !Number(parcel.width_cm) || !Number(parcel.height_cm)) return "Enter positive weight and all package dimensions."
+    return ""
   }
-  async function submit() {
-    const rate = rates[selected]; if (!rate || !engineShipment) return setMessage("Calculate rates before purchasing a label.")
+  const call = async (url: string, body: unknown) => { const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.error ?? "Something went wrong."); return payload }
+  async function createAndQuote() {
+    const error = valid(); if (error) return setMessage(error)
     setBusy(true); setMessage("")
-    const response = await fetch(`/api/shipping-engine/shipments/${engineShipment.id}/label`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rateId: rate.id }) })
-    const payload = await response.json(); setBusy(false)
-    if (!response.ok) return setMessage(payload.error ?? "Unable to purchase label")
-    setLabelUrl(payload.label?.labelUrl ?? null)
-    setMessage(`Label purchased. Tracking number: ${payload.trackingNumber}`)
+    try {
+      const created = await call("/api/shipments", { reference_number: reference, sender, recipient, package: { weight_kg: Number(parcel.weight_kg), length_cm: Number(parcel.length_cm), width_cm: Number(parcel.width_cm), height_cm: Number(parcel.height_cm), declared_value: 0 }, item: { name: parcel.package_type, quantity: 1 } })
+      const id = created.shipment.id as string
+      const quoted = await call("/api/shipping/rates", { shipmentId: id, origin: { ...sender, street1: sender.line1, postalCode: sender.postal_code, country: sender.country_code }, destination: { ...recipient, street1: recipient.line1, postalCode: recipient.postal_code, country: recipient.country_code }, packages: [{ weight: Number(parcel.weight_kg), weightUnit: "kg", length: Number(parcel.length_cm), width: Number(parcel.width_cm), height: Number(parcel.height_cm), dimensionUnit: "cm", packageType: parcel.package_type }] })
+      setShipmentId(id); setRates(quoted.rates ?? []); setStep(2); setMessage(`${quoted.rates?.length ?? 0} Unifet rate options saved to your shipment.`)
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to create shipment.") } finally { setBusy(false) }
   }
-  const addressFields = (side: "from" | "to", value: Address) => <div className="grid gap-3 sm:grid-cols-2">{(["name", "street1", "city", "state", "postalCode", "country"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium sm:col-span-1">{key === "street1" ? "Street address" : key === "postalCode" ? "Postal code" : key[0].toUpperCase() + key.slice(1)}{key === "street1" ? <AddressAutocomplete value={value[key]} onChange={(nextValue) => updateAddress(side, key, nextValue)} onSelect={(suggestion) => side === "from" ? setOriginCoordinates(suggestion.coordinates) : setDestinationCoordinates(suggestion.coordinates)} placeholder="Start typing an address" /> : <input required={key === "city" || key === "postalCode"} value={value[key]} onChange={(event) => updateAddress(side, key, event.target.value)} className="h-11 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:border-primary" />}</label>)}</div>
-  return <div className="flex flex-col gap-7">
-    <section className="flex flex-col gap-4"><div><h2 className="text-lg font-semibold">Route details</h2><p className="text-sm text-muted-foreground">Where should we collect and deliver your shipment?</p></div><div className="grid gap-5 lg:grid-cols-2"><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">Sender</p>{addressFields("from", from)}</div><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">Receiver</p>{addressFields("to", to)}</div></div></section>
-    <section className="flex flex-col gap-4"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">Packages</h2><p className="text-sm text-muted-foreground">Add weight and dimensions for each parcel.</p></div><Button type="button" variant="outline" size="sm" onClick={() => setParcels((current) => [...current, { ...emptyParcel }])}><Plus data-icon="inline-start" />Add parcel</Button></div>{parcels.map((parcel, index) => <div key={index} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-5"><label className="flex flex-col gap-1 text-sm font-medium">Weight kg<input required type="number" min="0.1" step="0.1" value={parcel.weightKg} onChange={(event) => updateParcel(index, "weightKg", event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>{(["lengthCm", "widthCm", "heightCm"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium">{key.replace("Cm", " cm")}<input type="number" min="1" value={parcel[key]} onChange={(event) => updateParcel(index, key, event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>)}<label className="flex flex-col gap-1 text-sm font-medium">Item type<input value={parcel.itemType} onChange={(event) => updateParcel(index, "itemType", event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>{parcels.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setParcels((current) => current.filter((_, parcelIndex) => parcelIndex !== index))} aria-label="Remove parcel"><Trash2 data-icon="inline-start" />Remove</Button>}</div>)}<label className="flex max-w-xs flex-col gap-1 text-sm font-medium">Declared value (USD)<input type="number" min="0" step="0.01" value={declaredValue} onChange={(event) => setDeclaredValue(event.target.value)} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label></section>
-    <div className="flex flex-col gap-3 sm:flex-row"><Button type="button" onClick={getRates} disabled={busy} className="flex-1">{busy ? "Calculating…" : "Compare delivery options"}<ArrowRight data-icon="inline-end" /></Button><Link href="/login" className="flex items-center justify-center rounded-lg border px-5 text-sm font-semibold">Sign in</Link></div>
-    {rates.length > 0 && <section className="flex flex-col gap-3"><div><h2 className="font-semibold">Recommended delivery options</h2><p className="text-sm text-muted-foreground">Rates are estimates and will be confirmed before dispatch.</p></div>{rates.map((rate, index) => <button type="button" key={rate.id} onClick={() => setSelected(index)} className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${selected === index ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"}`}><span className="flex size-10 items-center justify-center overflow-hidden rounded-full bg-muted">{rate.carrierLogoUrl ? <Image src={rate.carrierLogoUrl} alt={`${rate.carrier} logo`} width={32} height={32} className="size-8 object-cover" unoptimized /> : <Check className="size-4" />}</span><span className="flex-1"><span className="block font-semibold">{rate.carrier} · {rate.service}</span><span className="text-sm text-muted-foreground">Estimated delivery in {rate.estimatedDays} business days</span></span><span className="font-semibold">${(rate.amountCents / 100).toFixed(2)}</span></button>)}<Button type="button" onClick={submit} disabled={busy || !engineShipment} className="w-full">{busy ? "Purchasing label…" : "Purchase label"}</Button>{labelUrl && <div className="flex gap-3"><a href={labelUrl} target="_blank" rel="noreferrer" className="flex-1 rounded-lg border px-4 py-2 text-center text-sm font-semibold">Download label</a><button type="button" onClick={() => window.open(labelUrl, "_blank", "noopener,noreferrer")} className="flex-1 rounded-lg border px-4 py-2 text-sm font-semibold">Print label</button></div>}</section>}
+  async function selectRate() { if (!selectedRate || !shipmentId) return setMessage("Choose a delivery service first."); setBusy(true); setMessage(""); try { await call(`/api/shipments/${shipmentId}/transition`, { action: "select_service", rate_id: selectedRate.id }); setStep(3); setMessage("Service selected. Review the test payment before creating your label.") } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to select rate.") } finally { setBusy(false) } }
+  async function payAndLabel() { if (!selectedRate || !shipmentId) return; setBusy(true); setMessage(""); try { await call(`/api/shipments/${shipmentId}/transition`, { action: "pay" }); const payload = await call("/api/shipping/labels", { shipmentId, origin: { ...sender, street1: sender.line1, postalCode: sender.postal_code, country: sender.country_code }, destination: { ...recipient, street1: recipient.line1, postalCode: recipient.postal_code, country: recipient.country_code }, packages: [{ weight: Number(parcel.weight_kg), weightUnit: "kg", length: Number(parcel.length_cm), width: Number(parcel.width_cm), height: Number(parcel.height_cm), dimensionUnit: "cm", packageType: parcel.package_type }], rate: { carrier: selectedRate.carrier_name, service: selectedRate.service_name, serviceCode: selectedRate.service_code, amount: Number(selectedRate.amount), currency: selectedRate.currency } }); setLabel(payload.label); setStep(4); setMessage("Test label created and saved. No real carrier charge was made.") } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to create label.") } finally { setBusy(false) } }
+  const fields = (side: "sender" | "recipient", value: Address) => <div className="grid gap-3 sm:grid-cols-2">{(["name", "line1", "city", "state", "postal_code"] as const).map((key) => <label key={key} className="flex flex-col gap-1 text-sm font-medium sm:col-span-1">{key === "line1" ? "Street address" : key === "postal_code" ? "Postal code" : key === "name" ? "Contact name" : key[0].toUpperCase() + key.slice(1)}{key === "line1" ? <AddressAutocomplete value={value[key]} onChange={(next) => update(side, key, next)} onSelect={() => undefined} placeholder="Start typing an address" /> : <input required value={value[key]} onChange={(event) => update(side, key, event.target.value)} className="h-11 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:border-primary" />}</label>)}</div>
+  const steps = ["Shipment details", "Choose a rate", "Confirm payment", "Label ready"]
+  return <div className="flex flex-col gap-7"><div className="grid grid-cols-4 gap-2">{steps.map((item, index) => <div key={item} className={`border-t-2 pt-2 text-xs font-semibold ${step > index ? "border-primary text-primary" : "border-muted text-muted-foreground"}`}><span className="mr-1">{step > index ? "✓" : index + 1}</span>{item}</div>)}</div>
+    {step === 1 && <><label className="flex max-w-sm flex-col gap-1 text-sm font-medium">Shipment reference<input value={reference} onChange={(event) => setReference(event.target.value)} className="h-11 rounded-lg border border-input bg-background px-3 font-normal" /></label><div className="grid gap-5 lg:grid-cols-2"><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">From address</p>{fields("sender", sender)}</div><div className="flex flex-col gap-3 rounded-xl border p-4"><p className="font-semibold">To address</p>{fields("recipient", recipient)}</div></div><section className="flex flex-col gap-4 rounded-xl border p-4"><div><h2 className="font-semibold">Package details</h2><p className="text-sm text-muted-foreground">Dimensions are required for an accurate Unifet quote.</p></div><div className="grid gap-3 sm:grid-cols-5">{([["weight_kg", "Weight kg"], ["length_cm", "Length cm"], ["width_cm", "Width cm"], ["height_cm", "Height cm"]] as const).map(([key, label]) => <label key={key} className="flex flex-col gap-1 text-sm font-medium">{label}<input required type="number" min="0.1" step="0.1" value={parcel[key]} onChange={(event) => setParcel((current) => ({ ...current, [key]: event.target.value }))} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label>)}<label className="flex flex-col gap-1 text-sm font-medium">Package type<input value={parcel.package_type} onChange={(event) => setParcel((current) => ({ ...current, package_type: event.target.value }))} className="h-11 rounded-lg border bg-background px-3 font-normal" /></label></div></section><Button type="button" onClick={createAndQuote} disabled={busy} className="w-full">{busy ? <><Loader2 className="animate-spin" />Saving shipment and calculating rates</> : <>Save shipment and get rates<ArrowRight data-icon="inline-end" /></>}</Button></>}
+    {step === 2 && <section className="flex flex-col gap-4"><div><h2 className="text-xl font-semibold">Choose a delivery service</h2><p className="text-sm text-muted-foreground">These normalized rates are from the Unifet rate engine.</p></div>{rates.map((rate) => <button type="button" key={rate.id} onClick={() => setSelectedRate(rate)} className={`flex items-center gap-3 rounded-xl border p-4 text-left ${selectedRate?.id === rate.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"}`}><span className="flex size-10 items-center justify-center rounded-full bg-primary/10"><Check className="size-4 text-primary" /></span><span className="flex-1"><span className="block font-semibold">{rate.service_name}</span><span className="text-sm text-muted-foreground">{rate.carrier_name} · {rate.estimated_days} business days</span></span><span className="font-semibold">{rate.currency} {Number(rate.amount).toFixed(2)}</span></button>)}<Button type="button" disabled={!selectedRate || busy} onClick={selectRate}>Select this service<ArrowRight data-icon="inline-end" /></Button></section>}
+    {step === 3 && <section className="rounded-xl border border-primary/30 bg-primary/5 p-5"><ShieldCheck className="mb-3 size-6 text-primary" /><h2 className="text-xl font-semibold">Confirm test payment</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">You are authorizing a mock payment of <strong>{selectedRate?.currency} {Number(selectedRate?.amount).toFixed(2)}</strong>. This development flow does not charge a card.</p><Button type="button" className="mt-5 w-full" disabled={busy} onClick={payAndLabel}>{busy ? <><Loader2 className="animate-spin" />Creating test label</> : "Confirm payment and create label"}</Button></section>}
+    {step === 4 && label && <section className="rounded-xl border border-primary/30 bg-primary/5 p-5"><Check className="mb-3 size-6 text-primary" /><p className="text-xs font-semibold uppercase tracking-wider text-primary">Test label created</p><h2 className="mt-2 text-xl font-semibold">Tracking: {label.trackingNumber}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Status is now label created. Continue in the tracking dashboard to advance the mock lifecycle.</p><div className="mt-5 flex flex-col gap-3 sm:flex-row">{label.labelUrl && <a href={label.labelUrl} target="_blank" rel="noreferrer" className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold"><Download className="size-4" />Download label</a>}<button type="button" onClick={() => label.labelUrl && window.open(label.labelUrl, "_blank", "noopener,noreferrer")} className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold"><Printer className="size-4" />Print label</button><Link href={`/dashboard/tracking?id=${label.trackingNumber}`} className="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">View tracking</Link></div></section>}
     {message && <p role="status" className="rounded-lg border bg-accent p-3 text-sm">{message}</p>}
   </div>
 }

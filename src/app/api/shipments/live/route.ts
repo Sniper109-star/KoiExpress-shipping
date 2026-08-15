@@ -1,14 +1,12 @@
-import { NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { shipments, trackingEvents } from "@/lib/db/schema";
+import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request) {
-  const limit = Math.min(Number(new URL(request.url).searchParams.get("limit") ?? 8) || 8, 20);
-  const rows = await db.select({ id: shipments.id, tracking_number: shipments.trackingNumber, origin: shipments.origin, destination: shipments.destination, origin_lat: shipments.originLat, origin_lng: shipments.originLng, destination_lat: shipments.destinationLat, destination_lng: shipments.destinationLng, status: shipments.status, updated_at: shipments.updatedAt }).from(shipments).orderBy(desc(shipments.updatedAt)).limit(limit);
-  const ids = rows.map((row) => row.id);
-  const locations = ids.length ? await db.select({ shipmentId: trackingEvents.shipmentId, latitude: trackingEvents.latitude, longitude: trackingEvents.longitude, location: trackingEvents.location, createdAt: trackingEvents.createdAt }).from(trackingEvents).orderBy(desc(trackingEvents.createdAt)).limit(100) : [];
-  const latestByShipment = new Map<string, (typeof locations)[number]>();
-  for (const location of locations) if (!latestByShipment.has(location.shipmentId)) latestByShipment.set(location.shipmentId, location);
-  return NextResponse.json({ shipments: rows.map((row) => ({ ...row, liveLocation: latestByShipment.get(row.id) ?? null })) }, { headers: { "Cache-Control": "no-store" } });
+  const limit = Math.min(Number(new URL(request.url).searchParams.get("limit") ?? 100) || 100, 100)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ shipments: [] }, { headers: { "Cache-Control": "no-store" } })
+  const { data: shipments, error } = await supabase.from("shipments").select("*, sender:addresses!sender_address_id(*), recipient:addresses!recipient_address_id(*), labels(*), tracking_events(*)").eq("created_by", user.id).order("created_at", { ascending: false }).limit(limit)
+  if (error) return NextResponse.json({ error: "Unable to load shipments" }, { status: 500 })
+  return NextResponse.json({ shipments: (shipments ?? []).map((shipment) => ({ ...shipment, tracking_number: shipment.tracking_number, origin: shipment.sender?.line1 ?? "", destination: shipment.recipient?.line1 ?? "", customer: shipment.recipient?.name ?? "", service: shipment.service_name ?? "Unselected", price: shipment.shipping_cost ?? shipment.quoted_amount ?? 0, label: shipment.labels?.[0] ?? null, tracking: shipment.tracking_events ?? [] })) }, { headers: { "Cache-Control": "no-store" } })
 }
