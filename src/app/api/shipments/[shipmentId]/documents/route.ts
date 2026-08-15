@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ ship
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  const { data: shipment } = await supabase.from('shipments').select('*, sender:addresses!sender_address_id(*), recipient:addresses!recipient_address_id(*), shipment_items(*), packages(*)').eq('id', shipmentId).single()
+  const { data: shipment } = await supabase.from('shipments').select('*, sender:addresses!sender_address_id(*), recipient:addresses!recipient_address_id(*), shipment_items(*), packages(*)').eq('id', shipmentId).eq('created_by', user.id).single()
   if (!shipment) return NextResponse.json({ error: 'Shipment not found.' }, { status: 404 })
   const title = parsed.data.type.replaceAll('_', ' ').toUpperCase()
   const lines = [`Reference: ${shipment.reference_number}`, `Tracking: ${shipment.tracking_number ?? 'Pending'}`, `Carrier: ${shipment.carrier_name ?? 'Unassigned'}`, `Service: ${shipment.service_name ?? 'Unassigned'}`, `Status: ${shipment.status}`, `Sender: ${shipment.sender?.name ?? ''}, ${shipment.sender?.line1 ?? ''}, ${shipment.sender?.city ?? ''}`, `Recipient: ${shipment.recipient?.name ?? ''}, ${shipment.recipient?.line1 ?? ''}, ${shipment.recipient?.city ?? ''}`, `Items: ${(shipment.shipment_items ?? []).map((item: { name: string; quantity: number }) => `${item.name} x${item.quantity}`).join(', ') || 'No items listed'}`, `Generated: ${new Date().toISOString()}`]

@@ -1,13 +1,16 @@
-import { NextResponse } from "next/server"
-import { asc, eq } from "drizzle-orm"
-import { db } from "@/lib/db"
-import { shippingEvents, trackingEvents } from "@/lib/db/schema"
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ shipmentId: string }> }) {
   const { shipmentId } = await params
-  if (!shipmentId || shipmentId.length > 128) return NextResponse.json({ error: "Invalid shipment id" }, { status: 400 })
-  const legacy = await db.select().from(trackingEvents).where(eq(trackingEvents.shipmentId, shipmentId)).orderBy(asc(trackingEvents.createdAt))
-  const engine = await db.select().from(shippingEvents).where(eq(shippingEvents.shipmentId, shipmentId)).orderBy(asc(shippingEvents.createdAt))
-  const events = [...legacy.map((event) => ({ ...event, shipment_id: event.shipmentId, created_at: event.createdAt })), ...engine.map((event) => ({ id: event.id, shipment_id: event.shipmentId, status: event.eventType, location: null, latitude: null, longitude: null, message: event.eventType, created_at: event.createdAt }))]
-  return NextResponse.json({ events }, { headers: { "Cache-Control": "no-store" } })
+  if (!z.string().uuid().safeParse(shipmentId).success) return NextResponse.json({ error: 'Invalid shipment id' }, { status: 400 })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const { data: shipment } = await supabase.from('shipments').select('id').eq('id', shipmentId).eq('created_by', user.id).maybeSingle()
+  if (!shipment) return NextResponse.json({ error: 'Shipment not found' }, { status: 404 })
+  const { data, error } = await supabase.from('tracking_events').select('*').eq('shipment_id', shipmentId).order('occurred_at', { ascending: true }).order('created_at', { ascending: true })
+  if (error) return NextResponse.json({ error: 'Unable to load tracking events' }, { status: 500 })
+  return NextResponse.json({ events: data ?? [], source: 'supabase' }, { headers: { 'Cache-Control': 'no-store' } })
 }

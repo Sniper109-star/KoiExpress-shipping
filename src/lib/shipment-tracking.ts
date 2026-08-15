@@ -1,3 +1,5 @@
+import { subscribeToShipmentStream } from "@/lib/realtime"
+
 export type RealtimeTable = "shipments" | "tracking_events" | "notifications"
 
 export type TrackingShipment = {
@@ -55,7 +57,7 @@ function toShipment(row: Record<string, unknown>): TrackingShipment {
 export async function findShipment(trackingNumber: string) {
   const normalized = trackingNumber.trim().toUpperCase()
   if (normalized.length < 3) return null
-  const response = await fetch(`/api/track/${encodeURIComponent(normalized)}`, { cache: "no-store" })
+  const response = await fetch(`/api/tracking/${encodeURIComponent(normalized)}`, { cache: "no-store" })
   if (!response.ok) throw new Error("Unable to load shipment")
   const result = await response.json() as { shipment: Record<string, unknown> | null; events?: Record<string, unknown>[] }
   return result.shipment ? { shipment: toShipment(result.shipment), events: (result.events ?? []).map(toEvent) } : null
@@ -69,8 +71,5 @@ export async function getTrackingEvents(shipmentId: string) {
 }
 
 export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
-  const source = new EventSource("/api/shipments/stream")
-  source.addEventListener("shipment.updated", onChange)
-  source.addEventListener("shipments", onChange)
-  return () => source.close()
+  return subscribeToShipmentStream(() => onChange(), onChange)
 }

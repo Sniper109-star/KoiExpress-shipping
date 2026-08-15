@@ -3,6 +3,12 @@ import type { Address, LabelRequest, RateRequest, TrackingResult } from "../../t
 
 const stages: TrackingResult["status"][] = ["label_created", "picked_up", "in_transit", "out_for_delivery", "delivered"]
 
+function stableToken(value: string) {
+  let hash = 2166136261
+  for (const character of value) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619)
+  return (hash >>> 0).toString(16).padStart(8, "0").toUpperCase()
+}
+
 export class CustomMockCarrier implements CarrierAdapter {
   readonly code = "UNIFET_CARRIER"
   readonly name = "Unifet Test Carrier"
@@ -29,8 +35,9 @@ export class CustomMockCarrier implements CarrierAdapter {
   }
 
   async createLabel(request: LabelRequest) {
-    const trackingNumber = `UFTEST${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`
-    return { labelId: `LBL-TEST-${crypto.randomUUID().slice(0, 8).toUpperCase()}`, trackingNumber, labelUrl: null, labelFormat: "PDF" as const, carrier: request.rate.carrier, service: request.rate.service, isTest: true }
+    const fingerprint = stableToken(JSON.stringify({ origin: request.origin, destination: request.destination, rate: request.rate }))
+    const trackingNumber = `UFTEST${fingerprint}${stableToken(request.rate.serviceCode)}`
+    return { labelId: `LBL-TEST-${fingerprint}`, trackingNumber, labelUrl: null, labelFormat: "PDF" as const, carrier: request.rate.carrier, service: request.rate.service, isTest: true }
   }
 
   async cancelLabel(_trackingNumber: string) { return { cancelled: true } }

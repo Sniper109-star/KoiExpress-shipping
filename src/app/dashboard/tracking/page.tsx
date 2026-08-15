@@ -36,7 +36,10 @@ function TrackingContent() {
   }, []);
 
   useEffect(() => {
-    if (trackingId) void loadShipment(trackingId);
+    const timer = window.setTimeout(() => {
+      if (trackingId) void loadShipment(trackingId);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [loadShipment, trackingId]);
 
   useEffect(() => {

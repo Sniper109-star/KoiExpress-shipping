@@ -1,5 +1,5 @@
-import { customMockCarrier } from "./carriers/custom"
+import { getCarrierAdapter } from "./carrier-registry"
 
 export async function getTracking(trackingNumber: string) {
-  return customMockCarrier.getTracking(trackingNumber.trim().toUpperCase())
+  return getCarrierAdapter().getTracking(trackingNumber.trim().toUpperCase())
 }

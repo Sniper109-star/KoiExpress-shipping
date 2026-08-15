@@ -55,3 +55,29 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 1. Migrate remaining auth/admin routes and login/register pages to Supabase Auth and remove Better Auth runtime dependency.
 2. Add API/E2E coverage for authenticated shipment creation through delivery/refund and RLS isolation.
 3. Run Supabase advisors/security checks after final policy refinements.
+
+## Approved implementation update
+
+- Added forward migration `005_unifet_foundation.sql` for businesses, business membership, quote/label persistence, ownership columns, indexes, RLS policies, membership authorization helper, timestamp trigger, and canonical transition validation.
+- Hardened `POST/GET /api/shipments/[shipmentId]/transition` with UUID and JSON validation, terminal-state guards, server-side payment amount validation, idempotent mock payment/label writes, optimistic status updates, structured errors, and tracking-event persistence.
+- Verification after changes: `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass. Supabase Authentication is now the client auth provider; the legacy Better Auth endpoint returns a migration response and no longer initializes Better Auth or requires `BETTER_AUTH_SECRET`.
+- Carrier layer: `carrier.ts` is the Unifet contract, `carrier-registry.ts` selects adapters, and `CustomMockCarrier` provides deterministic, clearly test-labeled rates, labels, and tracking without Karrio runtime/database dependencies.
+- API boundary: `/api/shipping/rates`, `/api/shipping/labels`, and `/api/tracking/[trackingNumber]` remain Unifet-owned and persist results to Supabase; Karrio is used only as an architectural reference.
+
+## Stream and duplicate-route cleanup
+
+- Root cause of the `validationLevel` runtime error was the legacy Drizzle/Better Auth implementation of `/api/shipments/stream`; it now uses Supabase auth, business membership, shipment polling, and tracking events exclusively.
+- `/api/shipping/rates` and `/api/tracking/[trackingNumber]` are canonical. The older `/api/shipments/rates` and `/api/track/[trackingNumber]` paths are compatibility redirects only, with callers updated to canonical routes.
+- Consolidated client SSE subscriptions through `src/lib/realtime.ts`, fixed effect/purity lint failures, and excluded stale `.next/dev` types from TypeScript input. `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass; browser verification of the home page passed at 411x630 dark mode.
+
+## End-to-end shipment workflow
+
+- Applied the live Supabase schema for the shipment flow, including addresses, packages, payments, shipment documents, provider metadata, lifecycle timestamps, RLS, and idempotent tracking-event support.
+- `/api/shipments` persists addresses, package dimensions/weight, items, shipment, and initial event; `/api/shipping/rates` persists comparison rates and moves the shipment to `quoted`; service selection and mock payment remain guarded transitions.
+- `/api/shipping/labels` is idempotent, persists the selected carrier/service and tracking number, and returns a printable/downloadable PDF URL through the Supabase-backed document route.
+- Lifecycle transitions now enforce creator ownership, terminal states, cancellation restrictions, optimistic status updates, and tracking timeline writes. The customer form exposes cancellation and clear error/status messaging.
+- The application remains adapter-based: replace `CustomMockCarrier` in the carrier registry with `RealCarrierAdapter` while retaining the UI and normalized API contracts.
+- Verification: Supabase migrations succeeded; `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass; `/create-shipment` was browser-verified at 411x630 dark mode.
+- Follow-up hardening: shipment creation now validates both addresses through the registered Unifet adapter, returns idempotent existing shipments for retries, verifies package/item/event persistence, and rolls back the shipment if child persistence fails. The shipment events route now uses Supabase with creator ownership checks instead of retired Drizzle tables; the form sends a stable idempotency key.
+- Auth verification fix: `/login` was previously a static, non-submitting form and the root layout did not mount `Providers`, so Supabase Auth could not be used by the browser. Login now calls `signIn`, shows pending/errors, redirects to `/create-shipment`, and the root layout mounts `Providers` for persistent client auth state.
+- Validation: unauthenticated shipment creation returns 401; `/login` renders and hydrates in the browser; typecheck/lint pass; production build passes when run with `/vercel/share/.env.project` loaded. A real shipment submission still requires the user’s test account credentials.

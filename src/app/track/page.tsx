@@ -41,7 +41,10 @@ function TrackPageContent() {
 
   useEffect(() => {
     const initialTracking = searchParams.get("tracking") ?? searchParams.get("tracking_number");
-    if (initialTracking?.trim()) void loadShipment();
+    const timer = window.setTimeout(() => {
+      if (initialTracking?.trim()) void loadShipment();
+    }, 0);
+    return () => window.clearTimeout(timer);
     // The URL is intentionally read once to support shareable tracking links.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
