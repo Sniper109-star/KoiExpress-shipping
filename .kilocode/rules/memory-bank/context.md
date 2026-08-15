@@ -38,10 +38,20 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 - Added `/api/shipping/rates`, `/api/shipping/labels`, and normalized `/api/tracking/[trackingNumber]` routes. Existing `/api/shipments/rates` now routes through the same Unifet rate service.
 - Karrio-compatible code remains an optional carrier implementation reference behind the service boundary; Supabase data models remain Unifet-owned.
 
+## Complete mock shipment lifecycle
+
+- Rebuilt the customer shipment form as a staged flow: validate addresses/package, create shipment in Supabase, request and persist normalized rates, select a service, confirm mock payment, create and persist the CustomMockCarrier test label, then open/download/print it.
+- `/api/shipping/rates` now accepts a shipment ID and persists `shipping_rates`; `/api/shipping/labels` persists `labels`, updates shipment status/tracking, and records the initial tracking event.
+- Tracking lookup reads persisted Supabase shipment events first, while the mock adapter remains a fallback. The shipment dashboard now displays reference, customer, route, service, price, status, label, and tracking data from Supabase.
+
+## Verification
+
+- `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass.
+- Browser verification passed for `/create-shipment` at the current 411x576 dark viewport. The form renders the four lifecycle stages and accessible shipment/package fields.
+- Build still reports existing Better Auth default-secret warnings from legacy routes; they are unrelated to the carrier lifecycle and remain a migration gap.
+
 ## Next implementation priorities
 
 1. Migrate remaining auth/admin routes and login/register pages to Supabase Auth and remove Better Auth runtime dependency.
-2. Connect shipment detail/list screens to the new Supabase lifecycle and document endpoints.
-3. Persist new adapter label/tracking results into Supabase shipment tables from the lifecycle endpoints.
-4. Add API/E2E tests for authenticated shipment creation through delivery/refund and RLS isolation.
-5. Run Supabase advisors/security checks after final policy refinements.
+2. Add API/E2E coverage for authenticated shipment creation through delivery/refund and RLS isolation.
+3. Run Supabase advisors/security checks after final policy refinements.
