@@ -1,0 +1,14 @@
+alter table public.shipments add column if not exists pickup_latitude double precision;
+alter table public.shipments add column if not exists pickup_longitude double precision;
+alter table public.shipments add column if not exists delivery_latitude double precision;
+alter table public.shipments add column if not exists delivery_longitude double precision;
+alter table public.shipments add column if not exists current_latitude double precision;
+alter table public.shipments add column if not exists current_longitude double precision;
+alter table public.tracking_events add column if not exists latitude double precision;
+alter table public.tracking_events add column if not exists longitude double precision;
+create index if not exists shipments_tracking_number_idx on public.shipments (tracking_number);
+create index if not exists tracking_events_shipment_occurred_idx on public.tracking_events (shipment_id, occurred_at);
+alter table public.shipments replica identity full;
+alter table public.tracking_events replica identity full;
+do $$ begin alter publication supabase_realtime add table public.shipments; exception when duplicate_object then null; end $$;
+do $$ begin alter publication supabase_realtime add table public.tracking_events; exception when duplicate_object then null; end $$;

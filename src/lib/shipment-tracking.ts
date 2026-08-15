@@ -11,6 +11,8 @@ export type TrackingShipment = {
   origin_lng: number | null
   destination_lat: number | null
   destination_lng: number | null
+  current_lat: number | null
+  current_lng: number | null
   status: string
   eta: string | null
   driver_name: string | null
@@ -47,6 +49,8 @@ function toShipment(row: Record<string, unknown>): TrackingShipment {
     origin_lng: row.originLng != null ? Number(row.originLng) : row.origin_lng != null ? Number(row.origin_lng) : row.pickup_longitude != null ? Number(row.pickup_longitude) : null,
     destination_lat: row.destinationLat != null ? Number(row.destinationLat) : row.destination_lat != null ? Number(row.destination_lat) : row.delivery_latitude != null ? Number(row.delivery_latitude) : null,
     destination_lng: row.destinationLng != null ? Number(row.destinationLng) : row.destination_lng != null ? Number(row.destination_lng) : row.delivery_longitude != null ? Number(row.delivery_longitude) : null,
+    current_lat: row.currentLat != null ? Number(row.currentLat) : row.current_latitude != null ? Number(row.current_latitude) : null,
+    current_lng: row.currentLng != null ? Number(row.currentLng) : row.current_longitude != null ? Number(row.current_longitude) : null,
     status: String(row.status ?? "pending"), eta: row.eta ? String(row.eta) : row.estimated_delivery_at ? String(row.estimated_delivery_at) : null,
     driver_name: (row.driverName ?? row.driver_name) as string | null,
     vehicle: row.vehicle as string | null, updated_at: row.updatedAt ? String(row.updatedAt) : null,

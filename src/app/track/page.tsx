@@ -64,7 +64,7 @@ function TrackPageContent() {
   const stages = useMemo(() => shipment ? getTrackingStages(shipment.status, events) : [], [shipment, events]);
   const origin = shipment?.origin_lng != null && shipment.origin_lat != null ? [Number(shipment.origin_lng), Number(shipment.origin_lat)] as [number, number] : undefined;
   const destination = shipment?.destination_lng != null && shipment.destination_lat != null ? [Number(shipment.destination_lng), Number(shipment.destination_lat)] as [number, number] : undefined;
-  const currentLocation = markers.at(-1)?.coordinates;
+  const currentLocation = shipment?.current_lat != null && shipment.current_lng != null ? [shipment.current_lng, shipment.current_lat] as [number, number] : markers.at(-1)?.coordinates;
   const route = [origin, currentLocation, destination].filter(Boolean) as [number, number][];
   const statusLabel = shipment?.status.replaceAll("_", " ") ?? "pending";
   const lastUpdate = events.at(-1)?.created_at ?? shipment?.last_update;
