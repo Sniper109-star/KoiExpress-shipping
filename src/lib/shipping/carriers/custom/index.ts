@@ -14,22 +14,18 @@ export class CustomMockCarrier implements CarrierAdapter {
   readonly name = "Unifet Test Carrier"
 
   async getRates(request: RateRequest) {
-    const totalWeight = request.packages.reduce((sum, parcel) => sum + parcel.weight * (parcel.weightUnit === "lb" ? 0.453592 : 1), 0)
-    const international = request.origin.country !== request.destination.country
-    const base = (international ? 19 : 12) + totalWeight * 1.15
     const rates = [
-      ["Economy", "economy", 0.82, 5],
-      ["Standard", "standard", 1, 3],
-      ["Priority", "priority", 1.36, 2],
-      ["Express", "express", 1.92, 1],
-    ].map(([service, serviceCode, factor, days]) => ({
+      ["Ground", "ground", 8.95, 4, "3–5 days"],
+      ["Priority", "priority", 14.5, 3, "2–3 days"],
+      ["Express", "express", 24, 2, "1–2 days"],
+    ].map(([service, serviceCode, amount, days, deliveryRange]) => ({
       carrier: this.code,
       service: service as string,
       serviceCode: serviceCode as string,
-      amount: Math.round(base * (factor as number) * 100) / 100,
+      amount: amount as number,
       currency: "USD",
-      estimatedDays: (days as number) + (international ? 3 : 0),
-      metadata: { adapter: "custom-mock", test: true },
+      estimatedDays: days as number,
+      metadata: { adapter: "custom-mock", test: true, deliveryRange },
     }))
     return { rates, source: "mock" as const }
   }
