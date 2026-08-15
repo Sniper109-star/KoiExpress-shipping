@@ -1,16 +1,16 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 FROM base AS deps
 RUN apk add --no-cache python3 make g++
 WORKDIR /app
-COPY package.json bun.lockb ./
-RUN npm install -g bun && bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bun run build
+RUN npm run build
 
 FROM base AS runner
 WORKDIR /app

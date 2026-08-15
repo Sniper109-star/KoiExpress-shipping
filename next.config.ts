@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   transpilePackages: ["@shipframe/adapter-process.env.ADAPTER_MODE", "@shipframe/adapter-mock"],
   images: {
     remotePatterns: [
