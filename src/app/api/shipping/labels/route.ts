@@ -3,6 +3,7 @@ import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { createLabel } from "@/lib/shipping/label-service"
 import { labelRequestSchema } from "@/lib/shipping/types"
+import { notifyShipmentLifecycle } from "@/lib/shipment-notifications"
 
 const schema = labelRequestSchema.extend({ shipmentId: z.string().uuid() })
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: "Unable to save label." }, { status: 500 })
     await supabase.from("shipments").update({ status: "label_created", tracking_number: label.trackingNumber, carrier_name: label.carrier, service_name: label.service, updated_at: new Date().toISOString() }).eq("id", shipment.id).in("status", ["paid", "label_created"])
     await supabase.from("tracking_events").upsert({ shipment_id: shipment.id, status: "label_created", description: "Test shipping label created", provider: "custom_mock", provider_event_id: label.labelId, occurred_at: new Date().toISOString() }, { onConflict: "provider_event_id" })
+    void notifyShipmentLifecycle(supabase, shipment.id, "label_created").catch(() => undefined)
     return NextResponse.json({ label: { ...label, labelUrl, databaseId: saved.id }, notice: "Test adapter label. No production carrier charge or label was created." }, { status: 201 })
   } catch {
     return NextResponse.json({ error: "Unable to create shipping label." }, { status: 503 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { notifyShipmentLifecycle } from '@/lib/shipment-notifications'
 
 const inputSchema = z.object({
   action: z.enum(['select_service', 'pay', 'create_label', 'advance', 'cancel', 'refund']),
@@ -89,6 +90,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ shi
   if (updateError) return jsonError('Unable to update shipment.', 500)
   const { error: eventError } = await supabase.from('tracking_events').insert({ shipment_id: shipmentId, status, description: descriptions[status] ?? 'Shipment updated', provider: 'unifet', occurred_at: new Date().toISOString() })
   if (eventError) return jsonError('Shipment updated, but tracking event could not be recorded.', 500)
+  void notifyShipmentLifecycle(supabase, shipmentId, status).catch(() => undefined)
   return NextResponse.json({ shipment_id: shipmentId, status, source: 'mock' })
 }
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getCarrierAdapter } from '@/lib/shipping/carrier-registry'
+import { notifyShipmentLifecycle } from '@/lib/shipment-notifications'
 
 const addressSchema = z.object({
   name: z.string().min(2).max(120),
@@ -66,5 +67,6 @@ export async function POST(request: Request) {
     await supabase.from('shipments').delete().eq('id', shipment.id)
     return NextResponse.json({ error: 'Unable to persist the complete shipment record.' }, { status: 500 })
   }
+  void notifyShipmentLifecycle(supabase, shipment.id, 'draft').catch(() => undefined)
   return NextResponse.json({ shipment, next_step: 'quote' }, { status: 201 })
 }

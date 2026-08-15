@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { notifyShipmentLifecycle } from "@/lib/shipment-notifications"
 
 const steps = [
   { status: "picked_up", location: "Origin facility", latitudeOffset: 0.08, longitudeOffset: 0.08, description: "Shipment picked up" },
@@ -38,5 +39,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ shi
   const remainingMinutes = Math.max(0, Math.round((1 - point.latitudeOffset) * 240))
   const update = await supabase.from("shipments").update({ status: point.status, current_latitude: latitude, current_longitude: longitude, estimated_delivery_at: new Date(Date.now() + remainingMinutes * 60 * 1000).toISOString(), updated_at: now, ...(point.status === "delivered" ? { delivered_at: now } : {}) }).eq("id", shipmentId)
   if (update.error) return NextResponse.json({ error: "Unable to update shipment" }, { status: 500 })
+  void notifyShipmentLifecycle(supabase, shipmentId, point.status).catch(() => undefined)
   return NextResponse.json({ step, totalSteps: steps.length, status: point.status, latitude, longitude, event: event.data })
 }
