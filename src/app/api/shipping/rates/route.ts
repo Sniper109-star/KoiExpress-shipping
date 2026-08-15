@@ -26,6 +26,9 @@ export async function POST(request: Request) {
     const rows = result.rates.map((rate) => ({ shipment_id: shipment.id, carrier_code: rate.carrier.toLowerCase().replaceAll(" ", "_"), carrier_name: rate.carrier, service_code: rate.serviceCode, service_name: rate.service, amount: rate.amount, currency: rate.currency, estimated_days: rate.estimatedDays, provider: result.source, provider_payload: rate.metadata ?? {} }))
     const { data: saved, error } = await supabase.from("shipping_rates").insert(rows).select()
     if (error) return NextResponse.json({ error: "Unable to save rates." }, { status: 500 })
+    const { error: statusError } = await supabase.from("shipments").update({ status: "quoted", updated_at: new Date().toISOString() }).eq("id", shipment.id).in("status", ["draft", "quoted"])
+    if (statusError) return NextResponse.json({ error: "Rates were calculated but the shipment could not be updated." }, { status: 500 })
+    await supabase.from("tracking_events").insert({ shipment_id: shipment.id, status: "quoted", description: "Shipping rates calculated", provider: result.source, occurred_at: new Date().toISOString() })
     return NextResponse.json({ rates: saved ?? [], source: result.source, notice: "Test carrier rates; no carrier credentials used." })
   } catch {
     return NextResponse.json({ error: "Shipping rates are temporarily unavailable." }, { status: 503 })

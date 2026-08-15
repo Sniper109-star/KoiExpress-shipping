@@ -69,3 +69,12 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 - Root cause of the `validationLevel` runtime error was the legacy Drizzle/Better Auth implementation of `/api/shipments/stream`; it now uses Supabase auth, business membership, shipment polling, and tracking events exclusively.
 - `/api/shipping/rates` and `/api/tracking/[trackingNumber]` are canonical. The older `/api/shipments/rates` and `/api/track/[trackingNumber]` paths are compatibility redirects only, with callers updated to canonical routes.
 - Consolidated client SSE subscriptions through `src/lib/realtime.ts`, fixed effect/purity lint failures, and excluded stale `.next/dev` types from TypeScript input. `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass; browser verification of the home page passed at 411x630 dark mode.
+
+## End-to-end shipment workflow
+
+- Applied the live Supabase schema for the shipment flow, including addresses, packages, payments, shipment documents, provider metadata, lifecycle timestamps, RLS, and idempotent tracking-event support.
+- `/api/shipments` persists addresses, package dimensions/weight, items, shipment, and initial event; `/api/shipping/rates` persists comparison rates and moves the shipment to `quoted`; service selection and mock payment remain guarded transitions.
+- `/api/shipping/labels` is idempotent, persists the selected carrier/service and tracking number, and returns a printable/downloadable PDF URL through the Supabase-backed document route.
+- Lifecycle transitions now enforce creator ownership, terminal states, cancellation restrictions, optimistic status updates, and tracking timeline writes. The customer form exposes cancellation and clear error/status messaging.
+- The application remains adapter-based: replace `CustomMockCarrier` in the carrier registry with `RealCarrierAdapter` while retaining the UI and normalized API contracts.
+- Verification: Supabase migrations succeeded; `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass; `/create-shipment` was browser-verified at 411x630 dark mode.

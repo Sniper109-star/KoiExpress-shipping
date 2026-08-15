@@ -35,7 +35,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ shi
   if (!user) return jsonError('Authentication required.', 401)
 
   const { data: shipment, error: shipmentError } = await supabase
-    .from('shipments').select('*, packages(*)').eq('id', shipmentId).single()
+    .from('shipments').select('*, packages(*)').eq('id', shipmentId).eq('created_by', user.id).single()
   if (shipmentError || !shipment) return jsonError('Shipment not found.', 404)
 
   const current = String(shipment.status)
@@ -97,6 +97,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ shi
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return jsonError('Authentication required.', 401)
+  const { data: shipment } = await supabase.from('shipments').select('id').eq('id', shipmentId).eq('created_by', user.id).maybeSingle()
+  if (!shipment) return jsonError('Shipment not found.', 404)
   const { data, error } = await supabase.from('tracking_events').select('*').eq('shipment_id', shipmentId).order('occurred_at', { ascending: true })
   if (error) return jsonError('Unable to load tracking events.', 500)
   return NextResponse.json({ events: data ?? [], source: 'mock' })
