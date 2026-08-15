@@ -19,6 +19,7 @@ export function CustomerShipmentForm() {
   const [recipient, setRecipient] = useState({ ...emptyAddress })
   const [parcel, setParcel] = useState({ ...emptyParcel })
   const [reference, setReference] = useState(() => `UN-${Date.now().toString(36).toUpperCase()}`)
+  const [idempotencyKey] = useState(() => crypto.randomUUID())
   const [shipmentId, setShipmentId] = useState<string | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
@@ -38,7 +39,7 @@ export function CustomerShipmentForm() {
     const error = valid(); if (error) return setMessage(error)
     setBusy(true); setMessage("")
     try {
-      const created = await call("/api/shipments", { reference_number: reference, sender, recipient, package: { weight_kg: Number(parcel.weight_kg), length_cm: Number(parcel.length_cm), width_cm: Number(parcel.width_cm), height_cm: Number(parcel.height_cm), declared_value: 0 }, item: { name: parcel.package_type, quantity: 1 } })
+      const created = await call("/api/shipments", { idempotency_key: idempotencyKey, reference_number: reference, sender, recipient, package: { weight_kg: Number(parcel.weight_kg), length_cm: Number(parcel.length_cm), width_cm: Number(parcel.width_cm), height_cm: Number(parcel.height_cm), declared_value: 0 }, item: { name: parcel.package_type, quantity: 1 } })
       const id = created.shipment.id as string
       const quoted = await call("/api/shipping/rates", { shipmentId: id, origin: { ...sender, street1: sender.line1, postalCode: sender.postal_code, country: sender.country_code }, destination: { ...recipient, street1: recipient.line1, postalCode: recipient.postal_code, country: recipient.country_code }, packages: [{ weight: Number(parcel.weight_kg), weightUnit: "kg", length: Number(parcel.length_cm), width: Number(parcel.width_cm), height: Number(parcel.height_cm), dimensionUnit: "cm", packageType: parcel.package_type }] })
       setShipmentId(id); setRates(quoted.rates ?? []); setStep(2); setMessage(`${quoted.rates?.length ?? 0} Unifet rate options saved to your shipment.`)
