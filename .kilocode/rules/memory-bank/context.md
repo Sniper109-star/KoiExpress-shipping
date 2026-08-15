@@ -60,4 +60,6 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 
 - Added forward migration `005_unifet_foundation.sql` for businesses, business membership, quote/label persistence, ownership columns, indexes, RLS policies, membership authorization helper, timestamp trigger, and canonical transition validation.
 - Hardened `POST/GET /api/shipments/[shipmentId]/transition` with UUID and JSON validation, terminal-state guards, server-side payment amount validation, idempotent mock payment/label writes, optimistic status updates, structured errors, and tracking-event persistence.
-- Verification after changes: `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass. Build still emits existing Better Auth default-secret warnings from legacy auth routes; Supabase auth remains the target path and this is a separate migration gap.
+- Verification after changes: `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass. Supabase Authentication is now the client auth provider; the legacy Better Auth endpoint returns a migration response and no longer initializes Better Auth or requires `BETTER_AUTH_SECRET`.
+- Carrier layer: `carrier.ts` is the Unifet contract, `carrier-registry.ts` selects adapters, and `CustomMockCarrier` provides deterministic, clearly test-labeled rates, labels, and tracking without Karrio runtime/database dependencies.
+- API boundary: `/api/shipping/rates`, `/api/shipping/labels`, and `/api/tracking/[trackingNumber]` remain Unifet-owned and persist results to Supabase; Karrio is used only as an architectural reference.

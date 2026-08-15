@@ -5,7 +5,7 @@ import { Client } from "@upstash/qstash"
 const qstash = process.env.QSTASH_TOKEN ? new Client({ token: process.env.QSTASH_TOKEN }) : null
 
 function appOrigin() {
-  const origin = process.env.BETTER_AUTH_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL ?? process.env.V0_DEV_APP_URL
+  const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL ?? process.env.V0_DEV_APP_URL
   return origin ? (origin.startsWith("http") ? origin : `https://${origin}`) : null
 }
 
