@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SmartsuppWidget } from "@/components/smartsupp-widget";
+import { Providers } from "./providers";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-background">
       <body className="antialiased bg-background min-h-screen font-sans">
-        {children}
+        <Providers>{children}</Providers>
         <SmartsuppWidget />
       </body>
     </html>
