@@ -55,3 +55,9 @@ Unifet logistics platform on Next.js 16. Supabase is the new target source of tr
 1. Migrate remaining auth/admin routes and login/register pages to Supabase Auth and remove Better Auth runtime dependency.
 2. Add API/E2E coverage for authenticated shipment creation through delivery/refund and RLS isolation.
 3. Run Supabase advisors/security checks after final policy refinements.
+
+## Approved implementation update
+
+- Added forward migration `005_unifet_foundation.sql` for businesses, business membership, quote/label persistence, ownership columns, indexes, RLS policies, membership authorization helper, timestamp trigger, and canonical transition validation.
+- Hardened `POST/GET /api/shipments/[shipmentId]/transition` with UUID and JSON validation, terminal-state guards, server-side payment amount validation, idempotent mock payment/label writes, optimistic status updates, structured errors, and tracking-event persistence.
+- Verification after changes: `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass. Build still emits existing Better Auth default-secret warnings from legacy auth routes; Supabase auth remains the target path and this is a separate migration gap.
