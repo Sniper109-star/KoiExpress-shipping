@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiveShipmentFeed } from "./live-shipment-feed";
-import { MapLibreMap } from "@/components/map";
 import { subscribeToShipmentStream } from "@/lib/realtime";
 import { MapPreviewSection } from "./map-preview-section";
 
@@ -126,12 +125,6 @@ export function LandingPage() {
             <Image src="/unifet-cargo-aircraft.png" alt="Unifet red cargo aircraft" width={1200} height={900} className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div className="flex items-center justify-between p-5"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Global reach</p><h3 className="mt-1 text-xl font-semibold">Air cargo</h3></div><Plane className="text-primary" /></div>
           </article>
-        </div>
-      </section>
-      <section className="border-y border-border bg-card">
-        <div className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28">
-          <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Live map</p><h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">See the journey in motion.</h2></div><p className="max-w-sm leading-7 text-muted-foreground">Pickup, route, and delivery checkpoints in one real-time view.</p></div>
-          <div className="relative overflow-hidden border border-border bg-background"><MapLibreMap className="h-[320px] w-full md:h-[480px]" origin={[-74.006, 40.7128]} destination={[-73.935, 40.7306]} driverLocation={[-73.98, 40.72]} route={[[-74.006, 40.7128], [-73.98, 40.72], [-73.935, 40.7306]]} /><div className="pointer-events-none absolute bottom-4 left-4 border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur"><p className="text-sm font-semibold">Live shipment visibility</p><p className="text-xs text-muted-foreground">Route synced with current checkpoints.</p></div></div>
         </div>
       </section>
       <MapPreviewSection />
