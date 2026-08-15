@@ -1,4 +1,4 @@
-import { subscribeToShipmentStream } from "@/lib/realtime"
+import { subscribeToTable } from "@/lib/realtime"
 
 export type RealtimeTable = "shipments" | "tracking_events" | "notifications"
 
@@ -81,6 +81,8 @@ export function getTrackingStages(status: string, events: TrackingEvent[]) {
   }))
 }
 
-export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
-  return subscribeToShipmentStream(() => onChange(), onChange)
+export function subscribeToShipment(shipmentId: string, onChange: () => void) {
+  const unsubscribeShipment = subscribeToTable("shipments", onChange, `id=eq.${shipmentId}`)
+  const unsubscribeEvents = subscribeToTable("tracking_events", onChange, `shipment_id=eq.${shipmentId}`)
+  return () => { unsubscribeShipment(); unsubscribeEvents() }
 }
