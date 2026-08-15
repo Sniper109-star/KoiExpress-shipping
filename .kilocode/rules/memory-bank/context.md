@@ -107,6 +107,7 @@ The Neon schema was validated and created incrementally through Neon MCP, includ
 - [x] Connected MapTiler live preview to Neon shipment coordinates and SSE updates; added `/api/driver/location` for authenticated GPS event ingestion and exposed latest tracking event coordinates in live shipment responses
 - [x] Added Neon Traccar tables (`traccar_devices`, `traccar_positions`, `traccar_tracking_links`), server-only Traccar REST sync using `API_2`/`API_KEY`, authenticated `/api/traccar/live`, and a live fleet panel on the authenticated dashboard
 - [x] Platform upgrade: fixed MapTiler directions failures to return safe direct-route fallback data, added resilient live-map update timing, hardened dashboard shipment loading with retry and empty states, and verified homepage browser flow plus typecheck/lint/build
+- [x] Release cleanup: corrected the env template, aligned CI with npm/package-lock, removed stale Supabase deployment assumptions from CI and Docker Compose, fixed Docker standalone build portability, and verified typecheck/lint/build
 
 ## Features Implemented
 
