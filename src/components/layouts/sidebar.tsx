@@ -10,6 +10,7 @@ import {
   Truck,
   MapPin,
   Settings,
+  CreditCard,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/dashboard/shipments", label: "Shipments", icon: Package },
   { href: "/dashboard/drivers", label: "Drivers", icon: Truck },
   { href: "/dashboard/tracking", label: "Tracking", icon: MapPin },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
