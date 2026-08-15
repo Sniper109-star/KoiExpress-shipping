@@ -1,13 +1,20 @@
-import { cookies } from "next/headers";
-import { verifyAdminSession } from "@/lib/admin-session";
+import { createClient } from "@/lib/supabase/server"
 
-export const ADMIN_SESSION_COOKIE = "admin_session";
+export type AdminUser = { id: string; email: string; role: string }
 
-export async function getAdminUser() {
-  const cookieStore = await cookies();
-  return verifyAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
+export async function getAdminUser(): Promise<AdminUser | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return null
+  const role = typeof user.app_metadata?.role === "string" ? user.app_metadata.role : null
+  if (role === "admin" || role === "operations") return { id: user.id, email: user.email, role }
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+  if (profile?.role === "admin" || profile?.role === "operations") return { id: user.id, email: user.email, role: profile.role }
+  return null
 }
 
-export function isAdminRole(user: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } | null) {
-  return user?.app_metadata?.role === "admin" || user?.user_metadata?.role === "admin";
+export async function getAuthenticatedUser() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const MAPTILER_BASE = "https://api.maptiler.com";
+const UNIFET_MAP_STYLE_ID = "01a0050e-b9d9-78e5-a753-e11bde9db174";
 
 function rewriteUrls(value: unknown): unknown {
   if (typeof value === "string" && value.startsWith(MAPTILER_BASE)) {
@@ -19,7 +20,7 @@ function rewriteUrls(value: unknown): unknown {
 export async function GET() {
   const key = process.env.MAPTILER_API_KEY;
   if (!key) return NextResponse.json({ error: "MapTiler is not configured" }, { status: 503 });
-  const upstream = await fetch(`${MAPTILER_BASE}/maps/streets-v2/style.json?key=${encodeURIComponent(key)}`, { next: { revalidate: 3600 } });
+  const upstream = await fetch(`${MAPTILER_BASE}/maps/${UNIFET_MAP_STYLE_ID}/style.json?key=${encodeURIComponent(key)}`, { next: { revalidate: 3600 } });
   if (!upstream.ok) return NextResponse.json({ error: "MapTiler style unavailable" }, { status: upstream.status });
   const style = await upstream.json();
   const rewrittenStyle = rewriteUrls(style) as Record<string, unknown>;

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { auditLogs, shipments, trackingEvents } from "@/lib/db/schema"
-import { getAdminUser } from "@/lib/admin-auth"
+import { getAdminUser, getAuthenticatedUser } from "@/lib/admin-auth"
 
 const createSchema = z.object({
   tracking_number: z.string().min(3).max(80),
@@ -28,8 +28,10 @@ const updateSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  const user = await getAuthenticatedUser()
+  if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
   const admin = await getAdminUser()
-  if (!admin) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
   const parsed = createSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid shipment details" }, { status: 400 })
   try {
@@ -43,8 +45,10 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const user = await getAuthenticatedUser()
+  if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
   const admin = await getAdminUser()
-  if (!admin) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
   const id = new URL(request.url).searchParams.get("id")
   if (!id || !z.string().uuid().safeParse(id).success) return NextResponse.json({ error: "Invalid shipment id" }, { status: 400 })
   const [shipment] = await db.update(shipments).set({ status: "cancelled", updatedAt: new Date(), lastUpdate: "Cancelled by administrator" }).where(eq(shipments.id, id)).returning()
@@ -57,7 +61,10 @@ export async function DELETE(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  if (!await getAdminUser()) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+  const user = await getAuthenticatedUser()
+  if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+  const admin = await getAdminUser()
+  if (!admin) return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
   const parsed = updateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Invalid shipment update" }, { status: 400 })
   const { id, status, driver_name, vehicle, eta, last_update } = parsed.data

@@ -88,7 +88,7 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
   }, [routeKey]);
 
   return (
-    <div ref={mapContainer} className={`${className} relative overflow-hidden`} role="img" aria-label="Shipment route map">
+    <div ref={mapContainer} className={`${className} relative overflow-hidden bg-card`} role="img" aria-label="Unifet shipment route map showing origin, current location, and destination">
       {mapError && (
         <div className="absolute inset-0 flex items-center justify-center bg-card/95 p-6 text-center">
           <div className="max-w-xs">

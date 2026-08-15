@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+'use client'
+
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 type User = { id: string; email?: string; user_metadata?: Record<string, unknown>; name?: string }
 type Session = { user: User } | null
-
-const supabase = createClient()
 
 type AuthContextType = {
   user: User | null
@@ -19,11 +19,13 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const supabase = useMemo(() => typeof window === 'undefined' ? null : createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!supabase) return
     let active = true
     supabase.auth.getUser().then(({ data }) => {
       if (!active) return
@@ -38,20 +40,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
     return () => { active = false; listener.subscription.unsubscribe() }
-  }, [])
+  }, [supabase])
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) throw new Error('Authentication is unavailable during server rendering')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw new Error(error.message.includes('Invalid login') ? 'Invalid email or password' : error.message)
     setUser(data.user as User); setSession(data.user ? { user: data.user as User } : null)
   }
   const signUp = async (email: string, password: string, fullName: string) => {
+    if (!supabase) throw new Error('Authentication is unavailable during server rendering')
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName }, emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? `${window.location.origin}/auth/callback` } })
     if (error) throw new Error(error.message)
     setUser(data.user as User | null); setSession(data.user ? { user: data.user as User } : null)
   }
-  const signOut = async () => { const { error } = await supabase.auth.signOut(); if (error) throw error; setUser(null); setSession(null) }
-  const resetPassword = async (email: string) => { const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback` }); if (error) throw error }
+  const signOut = async () => { if (!supabase) return; const { error } = await supabase.auth.signOut(); if (error) throw error; setUser(null); setSession(null) }
+  const resetPassword = async (email: string) => { if (!supabase) throw new Error('Authentication is unavailable during server rendering'); const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback` }); if (error) throw error }
 
   return <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, resetPassword }}>{children}</AuthContext.Provider>
 }

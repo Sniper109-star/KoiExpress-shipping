@@ -1,57 +1,60 @@
-"use client";
+'use client'
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { DashboardLayout } from "@/components/layouts/dashboard-layout";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Package, TrendingUp, Clock, MapPin, Plus, Radio } from "lucide-react";
-import { subscribeToTable } from "@/lib/realtime";
-import { TraccarLivePanel } from "@/components/traccar-live-panel";
-import { ReplicationPanel } from "@/components/replication-panel";
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { DashboardLayout } from '@/components/layouts/dashboard-layout'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { CreateTestShipmentButton } from '@/components/create-test-shipment-button'
+import { MockSimulatorButton } from '@/components/mock-simulator-button'
+import { subscribeToTable } from '@/lib/realtime'
+import { ArrowRight, CheckCircle2, Clock3, FileText, MapPin, Package, Plus, Printer, Radio, TriangleAlert } from 'lucide-react'
 
-type Shipment = { id: string; tracking_number: string; origin: string; destination: string; status: string; created_at: string };
+type Address = { name?: string; city?: string; state?: string; country_code?: string }
+type Shipment = { id: string; tracking_number?: string | null; reference_number?: string | null; origin?: string | null; destination?: string | null; status: string; created_at: string; service?: string | null; shipping_method?: string | null; estimated_delivery_date?: string | null; eta?: string | null; total_cost?: number | null; cost?: number | null; sender?: Address; recipient?: Address }
 
-function getStatusBadge(status: string) {
-  const styles: Record<string, string> = { delivered: "bg-success/10 text-success", in_transit: "bg-primary/10 text-primary", pending: "bg-secondary/10 text-secondary" };
-  return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status] ?? "bg-muted text-muted-foreground"}`}>{status.replaceAll("_", " ")}</span>;
+type View = 'all' | 'active' | 'delivered' | 'exceptions'
+const terminal = ['delivered', 'cancelled', 'returned']
+const exceptions = ['exception', 'delayed', 'failed_delivery']
+
+function statusLabel(status: string) { return status.replaceAll('_', ' ') }
+function statusClass(status: string) { if (status === 'delivered') return 'border-success/30 bg-success/10 text-success'; if (exceptions.includes(status)) return 'border-destructive/30 bg-destructive/10 text-destructive'; if (terminal.includes(status)) return 'border-muted bg-muted text-muted-foreground'; return 'border-primary/30 bg-primary/10 text-primary' }
+function addressLabel(address?: Address, fallback?: string | null) { return fallback ?? ([address?.city, address?.state, address?.country_code].filter(Boolean).join(', ') || '—') }
+function money(value?: number | null) { return typeof value === 'number' ? `$${value.toFixed(2)}` : '—' }
+function dateLabel(value?: string | null) { return value ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—' }
+
+function ShipmentRow({ shipment }: { shipment: Shipment }) {
+  const tracking = shipment.tracking_number ?? shipment.reference_number ?? shipment.id.slice(0, 8).toUpperCase()
+  const origin = addressLabel(shipment.sender, shipment.origin)
+  const destination = addressLabel(shipment.recipient, shipment.destination)
+  const service = shipment.service ?? shipment.shipping_method ?? 'Unifet Standard'
+  return <Card className="overflow-hidden p-0">
+    <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="min-w-0 space-y-2">
+        <div className="flex flex-wrap items-center gap-2"><span className="font-mono text-sm font-semibold text-foreground">{tracking}</span><span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusClass(shipment.status)}`}>{statusLabel(shipment.status)}</span></div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{origin}</span><ArrowRight className="size-3" /><span>{destination}</span></div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"><span>{service}</span><span>{money(shipment.total_cost ?? shipment.cost)}</span><span>Created {dateLabel(shipment.created_at)}</span></div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 lg:justify-end"><span className="mr-2 text-xs text-muted-foreground">ETA {dateLabel(shipment.estimated_delivery_date ?? shipment.eta)}</span><Button asChild variant="outline" size="sm"><Link href={`/track?tracking=${encodeURIComponent(tracking)}`}><MapPin className="mr-1.5 size-3.5" />Track</Link></Button><Button asChild variant="ghost" size="sm"><Link href={`/api/shipments/${shipment.id}/documents?type=shipping_label`} target="_blank" rel="noreferrer"><FileText className="mr-1.5 size-3.5" />View label</Link></Button><Button asChild variant="ghost" size="sm"><Link href={`/api/shipments/${shipment.id}/documents?type=shipping_label&print=1`} target="_blank" rel="noreferrer"><Printer className="mr-1.5 size-3.5" />Print label</Link></Button></div>
+    </div>
+  </Card>
 }
 
 export default function DashboardPage() {
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  const loadShipments = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/shipments", { cache: "no-store" });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error ?? "Unable to load shipments");
-      setShipments((payload.shipments ?? []) as Shipment[]);
-      setLoadError(null);
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "Unable to load shipments");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => void loadShipments(), 0);
-    const unsubscribe = subscribeToTable("shipments", () => void loadShipments());
-    return () => {
-      window.clearTimeout(timer);
-      unsubscribe();
-    };
-  }, [loadShipments]);
-
-  const stats = useMemo(() => [
-    { label: "Total Shipments", value: shipments.length.toLocaleString(), icon: Package, color: "text-primary" },
-    { label: "Active Shipments", value: shipments.filter((shipment) => !["delivered", "cancelled", "returned"].includes(shipment.status)).length.toLocaleString(), icon: TrendingUp, color: "text-success" },
-    { label: "Updated Live", value: "Now", icon: Clock, color: "text-secondary" },
-    { label: "Delivered", value: shipments.filter((shipment) => shipment.status === "delivered").length.toLocaleString(), icon: MapPin, color: "text-success" },
-  ], [shipments]);
-
-  return <DashboardLayout><div className="space-y-6"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><div className="flex items-center gap-2"><h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard</h1><span className="inline-flex items-center gap-1 text-xs text-success"><Radio className="size-3" /> Live</span></div><p className="text-muted-foreground text-sm md:text-base">Live shipment operations across USA and global routes.</p></div><Link href="/dashboard/create"><Button className="gap-2"><Plus className="h-4 w-4" />New Shipment</Button></Link></div><div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">{stats.map((stat) => <Card key={stat.label} variant="default" className="p-4 md:p-6"><div className="flex items-center gap-3 md:gap-4"><div className={`flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary/10 ${stat.color}`}><stat.icon className="h-5 w-5 md:h-6 md:w-6" /></div><div><p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p><p className="text-xl md:text-2xl font-bold">{loading ? "—" : stat.value}</p></div></div></Card>)}</div><Card variant="default" className="p-4 md:p-6"><div className="flex items-center justify-between mb-4"><h2 className="text-lg font-semibold text-dark">Recent Shipments</h2><Link href="/dashboard/shipments"><Button variant="ghost" size="sm">View All</Button></Link></div><div className="space-y-2">{loadError ? <div className="flex items-center justify-between gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4"><p className="text-sm text-muted-foreground">{loadError}</p><Button variant="outline" size="sm" onClick={() => void loadShipments()}>Retry</Button></div> : loading ? <p className="py-8 text-center text-muted-foreground">Loading live data...</p> : shipments.length === 0 ? <div className="rounded-lg border border-dashed p-8 text-center"><p className="font-medium">No shipments yet</p><p className="mt-1 text-sm text-muted-foreground">Create your first shipment to start tracking operations.</p><Link href="/dashboard/create"><Button className="mt-4" size="sm">Create shipment</Button></Link></div> : shipments.slice(0, 5).map((shipment) => <div key={shipment.id} className="flex items-center justify-between gap-4 rounded-lg border p-3"><div><p className="font-medium">{shipment.tracking_number}</p><p className="text-sm text-muted-foreground">{shipment.origin} → {shipment.destination}</p></div><div className="flex items-center gap-3">{getStatusBadge(shipment.status)}<Link href={`/dashboard/tracking?id=${shipment.tracking_number}`}><Button variant="ghost" size="sm">View</Button></Link></div></div>)}</div></Card><TraccarLivePanel /><ReplicationPanel /></div></DashboardLayout>;
+  const [shipments, setShipments] = useState<Shipment[]>([])
+  const [view, setView] = useState<View>('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const loadShipments = useCallback(async () => { try { const response = await fetch('/api/shipments', { cache: 'no-store' }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error ?? 'Unable to load shipments'); setShipments(payload.shipments ?? []); setError(null) } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to load shipments') } finally { setLoading(false) } }, [])
+  useEffect(() => { const timer = window.setTimeout(() => void loadShipments(), 0); const unsubscribe = subscribeToTable('shipments', () => void loadShipments()); return () => { window.clearTimeout(timer); unsubscribe() } }, [loadShipments])
+  const counts = useMemo(() => ({ active: shipments.filter((item) => !terminal.includes(item.status) && !exceptions.includes(item.status)).length, delivered: shipments.filter((item) => item.status === 'delivered').length, exceptions: shipments.filter((item) => exceptions.includes(item.status)).length }), [shipments])
+  const visible = shipments.filter((item) => view === 'all' || (view === 'active' ? !terminal.includes(item.status) && !exceptions.includes(item.status) : view === 'delivered' ? item.status === 'delivered' : exceptions.includes(item.status)))
+  const tabs: { key: View; label: string; count?: number }[] = [{ key: 'all', label: 'Shipment history', count: shipments.length }, { key: 'active', label: 'Active shipments', count: counts.active }, { key: 'delivered', label: 'Delivered', count: counts.delivered }, { key: 'exceptions', label: 'Exceptions', count: counts.exceptions }]
+  return <DashboardLayout><main className="space-y-6">
+    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><div className="mb-2 flex items-center gap-2"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">UNIFET / CUSTOMER OPERATIONS</p><span className="inline-flex items-center gap-1 text-xs text-success"><Radio className="size-3" /> Live</span></div><h1 className="text-balance text-3xl font-bold tracking-tight">Your shipments, in one view.</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Create, rate, track, and manage every delivery from origin to doorstep.</p></div><Button asChild className="gap-2"><Link href="/dashboard/create"><Plus className="size-4" />New shipment</Link></Button></div>
+    <div className="grid gap-3 sm:grid-cols-3"><Card className="p-4"><div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Active shipments</span><Package className="size-4 text-primary" /></div><p className="mt-2 text-2xl font-semibold">{counts.active}</p><p className="mt-1 text-xs text-muted-foreground">Moving through the network</p></Card><Card className="p-4"><div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Delivered</span><CheckCircle2 className="size-4 text-success" /></div><p className="mt-2 text-2xl font-semibold">{counts.delivered}</p><p className="mt-1 text-xs text-muted-foreground">Completed deliveries</p></Card><Card className="p-4"><div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Exceptions</span><TriangleAlert className="size-4 text-destructive" /></div><p className="mt-2 text-2xl font-semibold">{counts.exceptions}</p><p className="mt-1 text-xs text-muted-foreground">Needs attention</p></Card></div>
+    <Card className="border-primary/20 bg-primary/[0.03] p-4 md:p-5"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="flex items-center gap-2"><Clock3 className="size-4 text-primary" /><h2 className="font-semibold">Test the complete delivery loop</h2></div><p className="mt-1 text-sm leading-6 text-muted-foreground">Create a test shipment, advance it through live tracking, and verify the delivered notification.</p></div><CreateTestShipmentButton /></div>{shipments.filter((item) => !terminal.includes(item.status)).slice(0, 2).map((item) => <div key={item.id} className="mt-3 flex flex-col gap-2 rounded-md border bg-background/70 p-3 sm:flex-row sm:items-center sm:justify-between"><div><span className="font-mono text-xs font-semibold">{item.tracking_number ?? item.reference_number ?? item.id.slice(0, 8)}</span><span className="ml-2 text-xs text-muted-foreground">{statusLabel(item.status)}</span></div><MockSimulatorButton shipmentId={item.id} trackingNumber={item.tracking_number ?? item.reference_number ?? item.id.slice(0, 8)} onAdvanced={() => void loadShipments()} /></div>)}</Card>
+    <div className="flex gap-1 overflow-x-auto border-b pb-px">{tabs.map((tab) => <button key={tab.key} type="button" onClick={() => setView(tab.key)} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-colors ${view === tab.key ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{tab.label}<span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">{tab.count}</span></button>)}</div>
+    {error ? <Card className="border-destructive/30 p-5 text-sm text-destructive">{error}</Card> : loading ? <Card className="p-8 text-center text-sm text-muted-foreground">Loading your shipments…</Card> : visible.length ? <div className="space-y-3">{visible.map((shipment) => <ShipmentRow key={shipment.id} shipment={shipment} />)}</div> : <Card className="p-10 text-center"><Package className="mx-auto size-8 text-muted-foreground" /><h2 className="mt-3 font-semibold">No shipments in this view</h2><p className="mt-1 text-sm text-muted-foreground">Create your first shipment to start tracking its journey.</p><Button asChild className="mt-4"><Link href="/dashboard/create">Create shipment</Link></Button></Card>}
+  </main></DashboardLayout>
 }

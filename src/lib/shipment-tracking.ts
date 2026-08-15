@@ -1,4 +1,4 @@
-import { subscribeToShipmentStream } from "@/lib/realtime"
+import { subscribeToTable } from "@/lib/realtime"
 
 export type RealtimeTable = "shipments" | "tracking_events" | "notifications"
 
@@ -11,6 +11,8 @@ export type TrackingShipment = {
   origin_lng: number | null
   destination_lat: number | null
   destination_lng: number | null
+  current_lat: number | null
+  current_lng: number | null
   status: string
   eta: string | null
   driver_name: string | null
@@ -33,21 +35,23 @@ export type TrackingEvent = {
 function toEvent(row: Record<string, unknown>): TrackingEvent {
   return {
     id: String(row.id), shipment_id: String(row.shipmentId ?? row.shipment_id),
-    status: String(row.status), location: (row.location as string | null) ?? null,
-    latitude: (row.latitude as number | null) ?? null, longitude: (row.longitude as number | null) ?? null,
-    message: String(row.message ?? "Shipment updated"), created_at: String(row.createdAt ?? row.created_at),
+    status: String(row.status ?? "pending"), location: (row.location as string | null) ?? null,
+    latitude: row.latitude == null ? null : Number(row.latitude), longitude: row.longitude == null ? null : Number(row.longitude),
+    message: String(row.message ?? row.description ?? "Shipment updated"), created_at: String(row.createdAt ?? row.created_at ?? new Date().toISOString()),
   }
 }
 
 function toShipment(row: Record<string, unknown>): TrackingShipment {
   return {
     id: String(row.id), tracking_number: String(row.trackingNumber ?? row.tracking_number),
-    origin: String(row.origin), destination: String(row.destination),
-    origin_lat: (row.originLat ?? row.origin_lat) as number | null,
-    origin_lng: (row.originLng ?? row.origin_lng) as number | null,
-    destination_lat: (row.destinationLat ?? row.destination_lat) as number | null,
-    destination_lng: (row.destinationLng ?? row.destination_lng) as number | null,
-    status: String(row.status), eta: row.eta ? String(row.eta) : null,
+    origin: String(row.origin ?? row.pickup_address ?? "Origin pending"), destination: String(row.destination ?? row.delivery_address ?? "Destination pending"),
+    origin_lat: row.originLat != null ? Number(row.originLat) : row.origin_lat != null ? Number(row.origin_lat) : row.pickup_latitude != null ? Number(row.pickup_latitude) : null,
+    origin_lng: row.originLng != null ? Number(row.originLng) : row.origin_lng != null ? Number(row.origin_lng) : row.pickup_longitude != null ? Number(row.pickup_longitude) : null,
+    destination_lat: row.destinationLat != null ? Number(row.destinationLat) : row.destination_lat != null ? Number(row.destination_lat) : row.delivery_latitude != null ? Number(row.delivery_latitude) : null,
+    destination_lng: row.destinationLng != null ? Number(row.destinationLng) : row.destination_lng != null ? Number(row.destination_lng) : row.delivery_longitude != null ? Number(row.delivery_longitude) : null,
+    current_lat: row.currentLat != null ? Number(row.currentLat) : row.current_latitude != null ? Number(row.current_latitude) : null,
+    current_lng: row.currentLng != null ? Number(row.currentLng) : row.current_longitude != null ? Number(row.current_longitude) : null,
+    status: String(row.status ?? "pending"), eta: row.eta ? String(row.eta) : row.estimated_delivery_at ? String(row.estimated_delivery_at) : null,
     driver_name: (row.driverName ?? row.driver_name) as string | null,
     vehicle: row.vehicle as string | null, updated_at: row.updatedAt ? String(row.updatedAt) : null,
     last_update: (row.lastUpdate ?? row.last_update) as string | null,
@@ -70,6 +74,19 @@ export async function getTrackingEvents(shipmentId: string) {
   return (result.events ?? []).map(toEvent)
 }
 
-export function subscribeToShipment(_shipmentId: string, onChange: () => void) {
-  return subscribeToShipmentStream(() => onChange(), onChange)
+const trackingStages = ["pending", "label_created", "picked_up", "in_transit", "out_for_delivery", "delivered"] as const
+
+export function getTrackingStages(status: string, events: TrackingEvent[]) {
+  const currentIndex = Math.max(trackingStages.indexOf(status as (typeof trackingStages)[number]), 0)
+  return trackingStages.map((stage, index) => ({
+    status: stage,
+    complete: index <= currentIndex,
+    event: [...events].reverse().find((event) => event.status === stage) ?? null,
+  }))
+}
+
+export function subscribeToShipment(shipmentId: string, onChange: () => void) {
+  const unsubscribeShipment = subscribeToTable("shipments", onChange, `id=eq.${shipmentId}`)
+  const unsubscribeEvents = subscribeToTable("tracking_events", onChange, `shipment_id=eq.${shipmentId}`)
+  return () => { unsubscribeShipment(); unsubscribeEvents() }
 }

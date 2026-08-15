@@ -1,14 +1,18 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { count, desc } from "drizzle-orm"
 import { ArrowUpRight, Clock3, PackageCheck, TriangleAlert, UsersRound } from "lucide-react"
 import { db } from "@/lib/db"
 import { profiles, shipments } from "@/lib/db/schema"
+import { getAdminUser } from "@/lib/admin-auth"
 
 const statuses = ["pending", "confirmed", "processing", "picked_up", "in_transit", "out_for_delivery", "delivered", "delayed", "cancelled"]
 const label = (status: string) => status.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase())
 const tone = (status: string) => status === "delivered" ? "bg-[#123e31] text-[#8be0ba]" : status === "delayed" || status === "cancelled" ? "bg-[#4a1f28] text-[#ff9b9f]" : "bg-[#173653] text-[#9bc8ee]"
 
 export default async function AdminDashboardPage() {
+  const admin = await getAdminUser()
+  if (!admin) redirect("/admin")
   const today = new Date(); today.setHours(0, 0, 0, 0)
   let rows: { status: string; total: number }[] = []
   let recent: typeof shipments.$inferSelect[] = []
