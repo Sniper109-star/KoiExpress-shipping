@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getCarrierAdapter } from '@/lib/shipping/carrier-registry'
 import { notifyShipmentLifecycle } from '@/lib/shipment-notifications'
+import { generateTrackingNumber, trackingUrl } from '@/lib/tracking-number'
 
 const addressSchema = z.object({
   name: z.string().min(2).max(120),
@@ -54,12 +55,21 @@ export async function POST(request: Request) {
   if (!senderValidation.valid || !recipientValidation.valid) return NextResponse.json({ error: 'Check the sender and recipient addresses.', issues: { sender: senderValidation.valid ? undefined : ['Enter a valid city, postal code, and country.'], recipient: recipientValidation.valid ? undefined : ['Enter a valid city, postal code, and country.'] } }, { status: 422 })
   if (input.idempotency_key) {
     const { data: existing } = await supabase.from('shipments').select('*').eq('business_id', businessId).eq('idempotency_key', input.idempotency_key).maybeSingle()
-    if (existing) return NextResponse.json({ shipment: existing, next_step: existing.status === 'draft' ? 'quote' : 'continue', idempotent: true }, { status: 200 })
+    if (existing) return NextResponse.json({ shipment: existing, trackingNumber: existing.tracking_number, trackingUrl: trackingUrl(existing.tracking_number), next_step: existing.status === 'draft' ? 'quote' : 'continue', idempotent: true }, { status: 200 })
   }
+  let trackingNumber = generateTrackingNumber()
   const addresses = await supabase.from('addresses').insert([{ ...input.sender, business_id: businessId }, { ...input.recipient, business_id: businessId }]).select('id')
   if (addresses.error || !addresses.data || addresses.data.length !== 2) return NextResponse.json({ error: 'Unable to save shipment addresses.' }, { status: 400 })
-  const { data: shipment, error } = await supabase.from('shipments').insert({ business_id: businessId, reference_number: input.reference_number, sender_address_id: addresses.data[0].id, recipient_address_id: addresses.data[1].id, created_by: user.id, idempotency_key: input.idempotency_key ?? crypto.randomUUID(), status: 'draft' }).select().single()
-  if (error || !shipment) return NextResponse.json({ error: error?.code === '23505' ? 'A shipment with this reference already exists.' : 'Unable to create shipment.' }, { status: 409 })
+  let shipment: Record<string, any> | null = null
+  let error: { code?: string } | null = null
+  for (let attempt = 0; attempt < 5 && !shipment; attempt += 1) {
+    if (attempt > 0) trackingNumber = generateTrackingNumber()
+    const result = await supabase.from('shipments').insert({ business_id: businessId, reference_number: input.reference_number, tracking_number: trackingNumber, sender_address_id: addresses.data[0].id, recipient_address_id: addresses.data[1].id, created_by: user.id, idempotency_key: input.idempotency_key ?? crypto.randomUUID(), status: 'draft' }).select().single()
+    shipment = result.data
+    error = result.error
+    if (error?.code !== '23505') break
+  }
+  if (error || !shipment) return NextResponse.json({ error: error?.code === '23505' ? 'Unable to generate a unique tracking number. Please retry.' : 'Unable to create shipment.' }, { status: error?.code === '23505' ? 503 : 409 })
   const packageInsert = await supabase.from('packages').insert({ shipment_id: shipment.id, weight_kg: input.package.weight_kg, length_cm: input.package.length_cm, width_cm: input.package.width_cm, height_cm: input.package.height_cm, declared_value: input.package.declared_value })
   const itemInsert = await supabase.from('shipment_items').insert({ shipment_id: shipment.id, name: input.item.name, quantity: input.item.quantity, sku: input.item.sku, unit_price: input.item.unit_price })
   const eventInsert = await supabase.from('tracking_events').insert({ shipment_id: shipment.id, status: 'draft', description: 'Shipment created', provider: 'unifet', occurred_at: new Date().toISOString() })
@@ -68,5 +78,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to persist the complete shipment record.' }, { status: 500 })
   }
   void notifyShipmentLifecycle(supabase, shipment.id, 'draft').catch(() => undefined)
-  return NextResponse.json({ shipment, next_step: 'quote' }, { status: 201 })
+  return NextResponse.json({ shipment, trackingNumber: shipment.tracking_number, trackingUrl: trackingUrl(shipment.tracking_number), next_step: 'quote' }, { status: 201 })
 }

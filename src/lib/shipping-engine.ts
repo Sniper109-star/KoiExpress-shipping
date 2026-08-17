@@ -9,6 +9,7 @@ import { shippingEvents, shippingLabels, shippingParcels, shippingRates, shippin
 import { getShippingRates, createShippingLabel, trackWithShippingProvider, voidShippingLabel } from "@/lib/services/shipping/shipping-service"
 import { scheduleShipmentTrackingRefresh } from "@/lib/qstash-workflow"
 import type { Rate, ShipmentDraft } from "../../packages/core/src"
+import { generateTrackingNumber } from "@/lib/tracking-number"
 
 export const shippingEngineInput = z.object({
   origin: z.record(z.string(), z.unknown()),
@@ -52,7 +53,7 @@ export async function purchaseEngineLabel(shipmentId: string, rateId: string) {
   if (!shipment[0] || !rate[0]) throw new Error("Shipment or rate not found")
   const record = shipment[0]
   const selected = rate[0]
-  const result = await createShippingLabel({ origin: record.origin as ShipmentDraft["origin"], destination: record.destination as ShipmentDraft["destination"], package: { weightKg: 1, itemType: "parcel", declaredValueCents: 0 }, rate: selected as unknown as Rate, trackingNumber: `UF${Date.now().toString().slice(-9)}` })
+  const result = await createShippingLabel({ origin: record.origin as ShipmentDraft["origin"], destination: record.destination as ShipmentDraft["destination"], package: { weightKg: 1, itemType: "parcel", declaredValueCents: 0 }, rate: selected as unknown as Rate, trackingNumber: generateTrackingNumber() })
   const trackingNumber = result.trackingNumber
   const labelId = `LBL-${crypto.randomUUID().slice(0, 12).toUpperCase()}`
   await db.update(shippingShipments).set({ status: "label_purchased", carrierCode: selected.carrierCode, serviceCode: selected.serviceCode, shippingCostCents: selected.totalCents, trackingNumber, updatedAt: new Date() }).where(and(eq(shippingShipments.id, shipmentId), eq(shippingShipments.userId, userId)))
