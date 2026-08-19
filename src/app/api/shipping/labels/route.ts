@@ -4,16 +4,20 @@ import { createClient } from "@/lib/supabase/server"
 import { createLabel } from "@/lib/shipping/label-service"
 import { labelRequestSchema } from "@/lib/shipping/types"
 import { notifyShipmentLifecycle } from "@/lib/shipment-notifications"
+import { createServiceRoleClient, guestAccessFrom } from "@/lib/guest-shipment-access"
 
 const schema = labelRequestSchema.extend({ shipmentId: z.string().uuid() })
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: "Enter a valid shipment and selected rate." }, { status: 400 })
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Sign in before creating a label." }, { status: 401 })
-  const { data: shipment } = await supabase.from("shipments").select("id, tracking_number").eq("id", parsed.data.shipmentId).eq("created_by", user.id).maybeSingle()
+  const sessionSupabase = await createClient()
+  const { data: { user } } = await sessionSupabase.auth.getUser()
+  if (!user && !guestAccessFrom(request, parsed.data.shipmentId)) return NextResponse.json({ error: "Shipment access token required." }, { status: 401 })
+  const supabase = user ? sessionSupabase : createServiceRoleClient()
+  let shipmentQuery = supabase.from("shipments").select("id, tracking_number").eq("id", parsed.data.shipmentId)
+  if (user) shipmentQuery = shipmentQuery.eq("created_by", user.id)
+  const { data: shipment } = await shipmentQuery.maybeSingle()
   if (!shipment) return NextResponse.json({ error: "Shipment not found." }, { status: 404 })
   try {
     const label = await createLabel(parsed.data)

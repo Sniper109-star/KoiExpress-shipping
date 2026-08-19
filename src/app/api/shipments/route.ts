@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCarrierAdapter } from '@/lib/shipping/carrier-registry'
 import { notifyShipmentLifecycle } from '@/lib/shipment-notifications'
 import { generateTrackingNumber, trackingUrl } from '@/lib/tracking-number'
+import { createGuestShipmentToken, createServiceRoleClient } from '@/lib/guest-shipment-access'
 
 const addressSchema = z.object({
   name: z.string().min(2).max(120),
@@ -43,28 +44,32 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { supabase, user, businessId } = await context()
-  if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-  if (!businessId) return NextResponse.json({ error: 'Create or join a business before shipping.' }, { status: 409 })
+  const { supabase: sessionSupabase, user, businessId } = await context()
+  const supabase = user ? sessionSupabase : createServiceRoleClient()
+  if (user && !businessId) return NextResponse.json({ error: 'Create or join a business before shipping.' }, { status: 409 })
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'Enter valid shipment details.', issues: parsed.error.flatten() }, { status: 400 })
   const input = parsed.data
   const adapter = getCarrierAdapter()
   const toCarrierAddress = (address: typeof input.sender) => ({ name: address.name, street1: address.line1, city: address.city, state: address.state, postalCode: address.postal_code, country: address.country_code, phone: address.phone ?? null, email: address.email ?? null })
+  const addressLabel = (address: typeof input.sender) => [address.line1, address.city, address.state, address.postal_code, address.country_code].filter(Boolean).join(', ')
   const [senderValidation, recipientValidation] = await Promise.all([adapter.validateAddress(toCarrierAddress(input.sender)), adapter.validateAddress(toCarrierAddress(input.recipient))])
   if (!senderValidation.valid || !recipientValidation.valid) return NextResponse.json({ error: 'Check the sender and recipient addresses.', issues: { sender: senderValidation.valid ? undefined : ['Enter a valid city, postal code, and country.'], recipient: recipientValidation.valid ? undefined : ['Enter a valid city, postal code, and country.'] } }, { status: 422 })
   if (input.idempotency_key) {
-    const { data: existing } = await supabase.from('shipments').select('*').eq('business_id', businessId).eq('idempotency_key', input.idempotency_key).maybeSingle()
-    if (existing) return NextResponse.json({ shipment: existing, trackingNumber: existing.tracking_number, trackingUrl: trackingUrl(existing.tracking_number), next_step: existing.status === 'draft' ? 'quote' : 'continue', idempotent: true }, { status: 200 })
+    let existingQuery = supabase.from('shipments').select('*').eq('idempotency_key', input.idempotency_key)
+    if (businessId) existingQuery = existingQuery.eq('business_id', businessId)
+    const { data: existing } = await existingQuery.maybeSingle()
+    if (existing) return NextResponse.json({ shipment: existing, trackingNumber: existing.tracking_number, trackingUrl: trackingUrl(existing.tracking_number), accessToken: user ? undefined : createGuestShipmentToken(existing.id), guest: !user, next_step: existing.status === 'draft' ? 'quote' : 'continue', idempotent: true }, { status: 200 })
   }
   let trackingNumber = generateTrackingNumber()
-  const addresses = await supabase.from('addresses').insert([{ ...input.sender, business_id: businessId }, { ...input.recipient, business_id: businessId }]).select('id')
+  const addressBase = businessId ? { business_id: businessId } : {}
+  const addresses = await supabase.from('addresses').insert([{ ...input.sender, ...addressBase }, { ...input.recipient, ...addressBase }]).select('id')
   if (addresses.error || !addresses.data || addresses.data.length !== 2) return NextResponse.json({ error: 'Unable to save shipment addresses.' }, { status: 400 })
   let shipment: Record<string, any> | null = null
   let error: { code?: string } | null = null
   for (let attempt = 0; attempt < 5 && !shipment; attempt += 1) {
     if (attempt > 0) trackingNumber = generateTrackingNumber()
-    const result = await supabase.from('shipments').insert({ business_id: businessId, reference_number: input.reference_number, tracking_number: trackingNumber, sender_address_id: addresses.data[0].id, recipient_address_id: addresses.data[1].id, created_by: user.id, idempotency_key: input.idempotency_key ?? crypto.randomUUID(), status: 'draft' }).select().single()
+    const result = await supabase.from('shipments').insert({ ...(businessId ? { business_id: businessId } : {}), reference_number: input.reference_number, tracking_number: trackingNumber, sender_address_id: addresses.data[0].id, recipient_address_id: addresses.data[1].id, pickup_address: addressLabel(input.sender), delivery_address: addressLabel(input.recipient), weight_kg: input.package.weight_kg, dimensions_cm: `${input.package.length_cm}x${input.package.width_cm}x${input.package.height_cm}`, description: input.item.name, price: 0, currency: 'USD', payment_status: 'unpaid', ...(user ? { created_by: user.id } : {}), idempotency_key: input.idempotency_key ?? crypto.randomUUID(), status: 'draft' }).select().single()
     shipment = result.data
     error = result.error
     if (error?.code !== '23505') break
@@ -78,5 +83,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to persist the complete shipment record.' }, { status: 500 })
   }
   void notifyShipmentLifecycle(supabase, shipment.id, 'draft').catch(() => undefined)
-  return NextResponse.json({ shipment, trackingNumber: shipment.tracking_number, trackingUrl: trackingUrl(shipment.tracking_number), next_step: 'quote' }, { status: 201 })
+  return NextResponse.json({ shipment, trackingNumber: shipment.tracking_number, trackingUrl: trackingUrl(shipment.tracking_number), accessToken: user ? undefined : createGuestShipmentToken(shipment.id), guest: !user, next_step: 'quote' }, { status: 201 })
 }

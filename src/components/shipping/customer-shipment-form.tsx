@@ -18,9 +18,10 @@ export function CustomerShipmentForm() {
   const [sender, setSender] = useState({ ...emptyAddress })
   const [recipient, setRecipient] = useState({ ...emptyAddress })
   const [parcel, setParcel] = useState({ ...emptyParcel })
-  const [reference, setReference] = useState(() => `UN-${Date.now().toString(36).toUpperCase()}`)
+  const [reference, setReference] = useState("")
   const [customerEmail, setCustomerEmail] = useState("")
-  const [idempotencyKey] = useState(() => crypto.randomUUID())
+  const [idempotencyKey, setIdempotencyKey] = useState("")
+  const [accessToken, setAccessToken] = useState<string | null>(null)
   const [shipmentId, setShipmentId] = useState<string | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
@@ -30,19 +31,24 @@ export function CustomerShipmentForm() {
   const [message, setMessage] = useState("")
 
   const update = (side: "sender" | "recipient", key: keyof Address, value: string) => side === "sender" ? setSender((current) => ({ ...current, [key]: value })) : setRecipient((current) => ({ ...current, [key]: value }))
-  const valid = () => {
-    if (!reference.trim() || !sender.name || !sender.line1 || !sender.city || !sender.postal_code || !recipient.name || !recipient.line1 || !recipient.city || !recipient.postal_code) return "Complete both addresses and add a shipment reference."
+  const valid = (referenceValue = reference) => {
+    if (!referenceValue.trim() || !sender.name || !sender.line1 || !sender.city || !sender.postal_code || !recipient.name || !recipient.line1 || !recipient.city || !recipient.postal_code) return "Complete both addresses and add a shipment reference."
     if (customerEmail && !/^\S+@\S+\.\S+$/.test(customerEmail)) return "Enter a valid confirmation email or leave it blank."
     if (!Number(parcel.weight_kg) || !Number(parcel.length_cm) || !Number(parcel.width_cm) || !Number(parcel.height_cm)) return "Enter positive weight and all package dimensions."
     return ""
   }
-  const call = async (url: string, body: unknown) => { const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.error ?? "Something went wrong."); return payload }
+  const call = async (url: string, body: unknown, token = accessToken) => { const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", ...(token ? { "x-shipment-access-token": token } : {}) }, body: JSON.stringify(body) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.error ?? "Something went wrong."); return payload }
   async function createAndQuote() {
-    const error = valid(); if (error) return setMessage(error)
-    setBusy(true); setMessage("")
+    if (busy) return
+    const nextReference = reference.trim() || `UN-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
+    const nextIdempotencyKey = idempotencyKey || crypto.randomUUID()
+    const error = valid(nextReference); if (error) return setMessage(error)
+    setReference(nextReference); setIdempotencyKey(nextIdempotencyKey); setBusy(true); setMessage("")
     try {
-      const created = await call("/api/shipments", { idempotency_key: idempotencyKey, reference_number: reference, sender, recipient, package: { weight_kg: Number(parcel.weight_kg), length_cm: Number(parcel.length_cm), width_cm: Number(parcel.width_cm), height_cm: Number(parcel.height_cm), declared_value: 0 }, item: { name: parcel.package_type, quantity: 1 } })
+      const created = await call("/api/shipments", { idempotency_key: nextIdempotencyKey, reference_number: nextReference, sender, recipient, package: { weight_kg: Number(parcel.weight_kg), length_cm: Number(parcel.length_cm), width_cm: Number(parcel.width_cm), height_cm: Number(parcel.height_cm), declared_value: 0 }, item: { name: parcel.package_type, quantity: 1 } })
       const id = created.shipment.id as string
+      const token = created.accessToken ?? null
+      setAccessToken(token); setShipmentId(id)
       const quoted = await call("/api/shipping/rates", { shipmentId: id, origin: { ...sender, street1: sender.line1, postalCode: sender.postal_code, country: sender.country_code }, destination: { ...recipient, street1: recipient.line1, postalCode: recipient.postal_code, country: recipient.country_code }, packages: [{ weight: Number(parcel.weight_kg), weightUnit: "kg", length: Number(parcel.length_cm), width: Number(parcel.width_cm), height: Number(parcel.height_cm), dimensionUnit: "cm", packageType: parcel.package_type }] })
       setShipmentId(id); setRates(quoted.rates ?? []); setStep(2); setMessage(`${quoted.rates?.length ?? 0} Unifet rate options saved to your shipment.`)
     } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to create shipment.") } finally { setBusy(false) }
