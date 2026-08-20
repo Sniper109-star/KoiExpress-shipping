@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { notifyShipmentLifecycle } from '@/lib/shipment-notifications'
+import { createServiceRoleClient, guestAccessFrom } from '@/lib/guest-shipment-access'
 
 const inputSchema = z.object({
   action: z.enum(['select_service', 'pay', 'create_label', 'advance', 'cancel', 'refund']),
@@ -31,12 +32,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ shi
   const parsed = inputSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return jsonError('Invalid transition request.', 400, parsed.error.flatten())
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return jsonError('Authentication required.', 401)
+  const sessionSupabase = await createClient()
+  const { data: { user } } = await sessionSupabase.auth.getUser()
+  if (!user && !guestAccessFrom(request, shipmentId)) return jsonError('Shipment access token required.', 401)
+  const supabase = user ? sessionSupabase : createServiceRoleClient()
 
-  const { data: shipment, error: shipmentError } = await supabase
-    .from('shipments').select('*, packages(*)').eq('id', shipmentId).eq('created_by', user.id).single()
+  let shipmentQuery = supabase.from('shipments').select('*, packages(*)').eq('id', shipmentId)
+  if (user) shipmentQuery = shipmentQuery.eq('created_by', user.id)
+  const { data: shipment, error: shipmentError } = await shipmentQuery.single()
   if (shipmentError || !shipment) return jsonError('Shipment not found.', 404)
 
   const current = String(shipment.status)

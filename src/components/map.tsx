@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 interface MapEvent {
@@ -60,7 +60,7 @@ export function MapLibreMap({ className = "h-[400px] w-full rounded-xl border", 
     map.current = instance;
     instance.addControl(new maplibregl.NavigationControl(), "top-right");
     instance.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }), "top-right");
-    instance.on("styleimagemissing", (event) => {
+    instance.on("styleimagemissing", (event: maplibregl.MapStyleImageMissingEvent) => {
       if (!instance.hasImage(event.id)) instance.addImage(event.id, { width: 1, height: 1, data: new Uint8Array([0, 0, 0, 0]) });
     });
     instance.on("error", () => setMapError(true));

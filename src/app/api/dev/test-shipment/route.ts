@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { generateTrackingNumber } from "@/lib/tracking-number"
 
 export async function POST() {
   if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "Development action unavailable in production." }, { status: 404 })
@@ -10,7 +11,7 @@ export async function POST() {
   if (!member?.business_id) return NextResponse.json({ error: "Create or join a business before shipping." }, { status: 409 })
 
   const reference = `DEV-${Date.now().toString(36).toUpperCase()}`
-  const trackingNumber = `UNF${Math.floor(100000000 + Math.random() * 899999999)}`
+  const trackingNumber = generateTrackingNumber()
   const origin = { name: "Unifet Test Origin", line1: "1 Hudson Street", city: "New York", state: "NY", postal_code: "10013", country_code: "US" }
   const destination = { name: "Unifet Test Destination", line1: "1 Atlantic Avenue", city: "Boston", state: "MA", postal_code: "02110", country_code: "US" }
   const addresses = await supabase.from("addresses").insert([{ ...origin, business_id: member.business_id }, { ...destination, business_id: member.business_id }]).select("id")
